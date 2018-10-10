@@ -8,7 +8,7 @@ import java.time.LocalDate;
 @Getter
 @AllArgsConstructor
 public class TimeReport {
-    private final String authorName;
+    private final String keyAuthor;
     private final String taskKey;
     private final LocalDate date;
     private final double timeSpent;

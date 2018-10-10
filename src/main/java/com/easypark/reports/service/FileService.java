@@ -1,9 +1,10 @@
 package com.easypark.reports.service;
 
-import org.apache.poi.ss.usermodel.Workbook;
+import com.easypark.reports.entity.GroupWorkBook;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 public interface FileService {
-   Workbook getTimeReportTable(String month, Integer year, HttpServletResponse response);
+   List<GroupWorkBook> getTimeReportTable(String month, Integer year, HttpServletResponse response);
 }

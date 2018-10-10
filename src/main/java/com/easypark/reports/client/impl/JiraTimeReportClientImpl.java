@@ -3,10 +3,11 @@ package com.easypark.reports.client.impl;
 import com.easypark.reports.client.JiraTimeReportClient;
 import com.easypark.reports.configuration.JiraProperties;
 import com.easypark.reports.configuration.TimeReportProperties;
-import com.easypark.reports.entity.Month;
-import com.easypark.reports.entity.jira.response.Issues;
+import com.easypark.reports.entity.CustomMonth;
+import com.easypark.reports.entity.jira.response.Issue;
 import com.easypark.reports.entity.jira.response.JiraResponse;
 import com.easypark.reports.entity.jira.worklog.WorkLog;
+import com.easypark.reports.util.GroupHelper;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
@@ -16,7 +17,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,8 +32,8 @@ public class JiraTimeReportClientImpl implements JiraTimeReportClient {
     private final TimeReportProperties reportProperties;
 
     @Override
-    public List<Issues> getIssues(Month monthRange, HttpEntity headers) {
-        List<JiraResponse> jiraResponses = getJiraResponse(monthRange, headers);
+    public List<Issue> getIssues(CustomMonth month, HttpEntity headers) {
+        List<JiraResponse> jiraResponses = getJiraResponse(month, headers);
         return jiraResponses.stream()
                 .map(JiraResponse::getIssues)
                 .flatMap(Collection::stream)
@@ -41,22 +41,21 @@ public class JiraTimeReportClientImpl implements JiraTimeReportClient {
     }
 
     @Override
-    public WorkLog getWorkLogsByIssuesId(Issues issues, HttpEntity headers) {
-        List<String> users = Arrays.asList(reportProperties.getUsers());
+    public WorkLog getWorkLogsByIssuesId(Issue issue, HttpEntity headers, List<String> users) {
         WorkLog allWorks = restTemplate
-                .exchange(createUriForWorkLogApi(issues.getId()), HttpMethod.GET, headers, WorkLog.class)
+                .exchange(createUriForWorkLogApi(issue.getId()), HttpMethod.GET, headers, WorkLog.class)
                 .getBody();
         return new WorkLog(allWorks.getWorkLogs().stream()
                 .filter(workReport -> users.contains(workReport.getAuthor().getKey()))
                 .collect(Collectors.toList()));
     }
 
-    private List<JiraResponse> getJiraResponse(Month monthRange, HttpEntity headers) {
+    private List<JiraResponse> getJiraResponse(CustomMonth month, HttpEntity headers) {
         int startAt = 0;
         JiraResponse jiraResponse;
         List<JiraResponse> jiraResponses = Lists.newArrayList();
         do {
-            URI uri = createUriForSearchApi(startAt, monthRange);
+            URI uri = createUriForSearchApi(startAt, month, GroupHelper.getAllGroups(reportProperties));
             jiraResponse = restTemplate.exchange(uri, HttpMethod.GET, headers, JiraResponse.class).getBody();
             startAt = jiraResponse.getStartAt() + MAX_RESULT;
             jiraResponses.add(jiraResponse);
@@ -64,13 +63,13 @@ public class JiraTimeReportClientImpl implements JiraTimeReportClient {
         return jiraResponses;
     }
 
-    private URI createUriForSearchApi(int startAt, Month monthRange) {
+    private URI createUriForSearchApi(int startAt, CustomMonth month, String[] users) {
         return UriComponentsBuilder
                 .fromUriString(jiraProperties.getDomain())
                 .path(jiraProperties.getPath() + "search")
                 .queryParam("startAt", startAt)
                 .queryParam("maxResults", MAX_RESULT)
-                .queryParam("jql", String.format(JQL, monthRange.getFromDate(), monthRange.getToDate(), Stream.of(reportProperties.getUsers()).collect(Collectors.joining(","))))
+                .queryParam("jql", String.format(JQL, month.getFromDate(), month.getToDate(), Stream.of(users).collect(Collectors.joining(","))))
                 .build()
                 .encode()
                 .toUri();

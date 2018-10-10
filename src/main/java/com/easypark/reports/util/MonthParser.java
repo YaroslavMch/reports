@@ -1,76 +1,64 @@
 package com.easypark.reports.util;
 
-import com.easypark.reports.entity.Month;
+import com.easypark.reports.entity.CustomMonth;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.http.HttpServletResponse;
-import java.time.LocalDate;
+import java.time.Month;
 
 @Slf4j
 public class MonthParser {
     private static final String ERROR_MESSAGE = "Month with name %s does not exist!";
 
-    public static Month getMonthRange(String monthName, int year, HttpServletResponse httpResponse) {
-        Month month;
+    public static CustomMonth getMonthRange(String monthName, int year, HttpServletResponse httpResponse) {
+        CustomMonth month;
         switch (monthName) {
             case "january": {
-                LocalDate initial = LocalDate.of(year, 1, 1);
-                month = new Month(initial.withDayOfMonth(1), initial.withDayOfMonth(initial.lengthOfMonth()));
+                month = new CustomMonth(Month.JANUARY, year);
                 break;
             }
             case "february": {
-                LocalDate initial = LocalDate.of(year, 2, 1);
-                month = new Month(initial.withDayOfMonth(1), initial.withDayOfMonth(initial.lengthOfMonth()));
+                month = new CustomMonth(Month.FEBRUARY, year);
                 break;
             }
             case "march": {
-                LocalDate initial = LocalDate.of(year, 3, 1);
-                month = new Month(initial.withDayOfMonth(1), initial.withDayOfMonth(initial.lengthOfMonth()));
+                month = new CustomMonth(Month.MARCH, year);
                 break;
             }
             case "april": {
-                LocalDate initial = LocalDate.of(year, 4, 1);
-                month = new Month(initial.withDayOfMonth(1), initial.withDayOfMonth(initial.lengthOfMonth()));
+                month = new CustomMonth(Month.APRIL, year);
                 break;
             }
             case "may": {
-                LocalDate initial = LocalDate.of(year, 5, 1);
-                month = new Month(initial.withDayOfMonth(1), initial.withDayOfMonth(initial.lengthOfMonth()));
+                month = new CustomMonth(Month.MAY, year);
                 break;
             }
             case "june": {
-                LocalDate initial = LocalDate.of(year, 6, 1);
-                month = new Month(initial.withDayOfMonth(1), initial.withDayOfMonth(initial.lengthOfMonth()));
+                month = new CustomMonth(Month.JUNE, year);
                 break;
             }
             case "july": {
-                LocalDate initial = LocalDate.of(year, 7, 1);
-                month = new Month(initial.withDayOfMonth(1), initial.withDayOfMonth(initial.lengthOfMonth()));
+                month = new CustomMonth(Month.JULY, year);
                 break;
             }
             case "august": {
-                LocalDate initial = LocalDate.of(year, 8, 1);
-                month = new Month(initial.withDayOfMonth(1), initial.withDayOfMonth(initial.lengthOfMonth()));
+                month = new CustomMonth(Month.AUGUST, year);
                 break;
             }
             case "september": {
-                LocalDate initial = LocalDate.of(year, 9, 1);
-                month = new Month(initial.withDayOfMonth(1), initial.withDayOfMonth(initial.lengthOfMonth()));
+                month = new CustomMonth(Month.SEPTEMBER, year);
                 break;
             }
             case "october": {
-                LocalDate initial = LocalDate.of(year, 10, 1);
-                month = new Month(initial.withDayOfMonth(1), initial.withDayOfMonth(initial.lengthOfMonth()));
+                month = new CustomMonth(Month.OCTOBER, year);
                 break;
             }
             case "november": {
-                LocalDate initial = LocalDate.of(year, 11, 1);
-                month = new Month(initial.withDayOfMonth(1), initial.withDayOfMonth(initial.lengthOfMonth()));
+                month = new CustomMonth(Month.NOVEMBER, year);
                 break;
             }
             case "december": {
-                LocalDate initial = LocalDate.of(year, 12, 1);
-                month = new Month(initial.withDayOfMonth(1), initial.withDayOfMonth(initial.lengthOfMonth()));
+                month = new CustomMonth(Month.DECEMBER, year);
                 break;
             }
             default: {

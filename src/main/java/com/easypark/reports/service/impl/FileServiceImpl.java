@@ -1,10 +1,15 @@
 package com.easypark.reports.service.impl;
 
-import com.easypark.reports.entity.Month;
+import com.easypark.reports.configuration.TimeReportProperties;
+import com.easypark.reports.entity.CustomMonth;
+import com.easypark.reports.entity.DevGroup;
+import com.easypark.reports.entity.GroupWorkBook;
 import com.easypark.reports.entity.TimeReport;
 import com.easypark.reports.service.FileService;
 import com.easypark.reports.service.TimeReportService;
+import com.easypark.reports.util.GroupHelper;
 import com.easypark.reports.util.MonthParser;
+import com.easypark.reports.util.NameCreator;
 import com.google.common.collect.Lists;
 import lombok.AllArgsConstructor;
 import org.apache.poi.ss.usermodel.BorderStyle;
@@ -21,28 +26,33 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
 import java.time.temporal.WeekFields;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
 public class FileServiceImpl implements FileService {
     private final TimeReportService timeReportService;
+    private final TimeReportProperties timeReportProperties;
 
     @Override
-    public Workbook getTimeReportTable(String month, Integer year, HttpServletResponse response) {
+    public List<GroupWorkBook> getTimeReportTable(String monthName, Integer year, HttpServletResponse response) {
         if (Objects.isNull(year)) {
             year = Calendar.getInstance().get(Calendar.YEAR);
         }
-        Month monthRange = MonthParser.getMonthRange(month, year, response);
-        Map<String, List<TimeReport>> timeReports = timeReportService.getGroupedTimeReports(monthRange);
-        List<String> allKeys = timeReportService.getAllTimeReportKeys(timeReports);
-        return createTable(timeReports, allKeys);
+        CustomMonth month = MonthParser.getMonthRange(monthName, year, response);
+        Map<String, List<TimeReport>> timeReports = timeReportService.getGroupedTimeReports(month);
+        return Arrays.asList(DevGroup.values()).stream()
+                .map(devGroup -> new GroupWorkBook(devGroup.getName(),
+                        createTable(timeReports, GroupHelper.getGroup(timeReportProperties, devGroup), devGroup.getRegex())
+                )).collect(Collectors.toList());
     }
 
-    private Workbook createTable(Map<String, List<TimeReport>> timeReports, List<String> allKeys) {
+    private Workbook createTable(Map<String, List<TimeReport>> timeReports, List<String> allKeys, String regex) {
         Workbook workBook = new XSSFWorkbook();
         CellStyle color_style = workBook.createCellStyle();
         CellStyle style_align_center = workBook.createCellStyle();
@@ -52,8 +62,14 @@ public class FileServiceImpl implements FileService {
         createBorder(style_no_align);
         style_align_center.setAlignment(HorizontalAlignment.CENTER);
         List<CellStyle> styles = Lists.newArrayList(color_style, style_align_center, style_no_align);
-        allKeys.stream().forEach(key -> createRow(workBook.createSheet(key),
-                timeReports.get(key), styles));
+        allKeys.forEach(key -> {
+            List<TimeReport> reports = timeReports.get(key).stream()
+                    .filter(timeReport -> timeReport.getTaskKey().matches(regex))
+                    .collect(Collectors.toList());
+            if (!reports.isEmpty()) {
+                createRow(workBook.createSheet(NameCreator.createNameFromKey(key)), reports, styles);
+            }
+        });
         return workBook;
     }
 
@@ -67,7 +83,9 @@ public class FileServiceImpl implements FileService {
             int currentWeek = timeReport.getDate().get(WeekFields.ISO.weekOfMonth());
             if (currentWeek > weekCounter) {
                 timeInMonth += timeInWeek;
-                createColorRow(sheet, styles.get(0), rowNum++, "Week " + weekCounter, "", String.valueOf(timeInWeek), "");
+                if (rowNum > 4) {
+                    createColorRow(sheet, styles.get(0), rowNum++, "Week " + weekCounter, "", String.valueOf(timeInWeek), "");
+                }
                 timeInWeek = 0;
                 weekCounter = currentWeek;
             }

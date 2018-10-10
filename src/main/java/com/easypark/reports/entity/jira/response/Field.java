@@ -4,13 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-
-@Setter
 @Getter
+@Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class JiraResponse {
-    private int startAt;
-    private int total;
-    private List<Issue> issues;
+public class Field {
+    private String summary;
 }

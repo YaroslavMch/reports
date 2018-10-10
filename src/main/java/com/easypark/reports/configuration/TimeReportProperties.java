@@ -8,7 +8,9 @@ import org.springframework.context.annotation.Configuration;
 @Getter
 @Setter
 @Configuration
-@ConfigurationProperties(prefix = "time.reports")
+@ConfigurationProperties(prefix = "time.reports.dev")
 public class TimeReportProperties {
-    private String[] users;
+    private String[] server;
+    private String[] app;
+    private String[] web;
 }
