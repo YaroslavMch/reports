@@ -57,7 +57,7 @@ public class TimeReportServiceImpl implements TimeReportService {
 
     private HttpEntity createHeadersForClient() {
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", "Basic " + "Ym9oZGFuLmtvcmlubnlpQGVhc3lwYXJrLm5ldDpRd2UxMjMhIQ==");
+        headers.add("Authorization", "Basic ");
         return new HttpEntity<>(headers);
     }
 
