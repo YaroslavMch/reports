@@ -6,6 +6,7 @@ import com.google.common.collect.ObjectArrays;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static ch.qos.logback.core.CoreConstants.EMPTY_STRING_ARRAY;
 
@@ -31,7 +32,9 @@ public class GroupHelper {
                 break;
             }
         }
-        return Arrays.asList(group);
+        return Arrays.stream(group)
+                .sorted()
+                .collect(Collectors.toList());
     }
 
     public static String[] getAllGroups(TimeReportProperties timeReportProperties) {

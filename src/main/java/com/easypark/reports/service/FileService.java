@@ -6,5 +6,5 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 public interface FileService {
-   List<GroupWorkBook> getTimeReportTable(String month, Integer year, HttpServletResponse response);
+   List<GroupWorkBook> getAllWorkBooks(String month, Integer year, HttpServletResponse response);
 }

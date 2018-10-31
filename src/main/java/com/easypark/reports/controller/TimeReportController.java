@@ -22,8 +22,8 @@ public class TimeReportController {
     @RequestMapping(value = "time-reports/{month}", produces = "application/zip")
     public ResponseEntity getTimeReports(@PathVariable String month, Integer year, HttpServletResponse response) {
         try {
-            response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"time-reports.zip\"");
-            zipService.writeToZip(response.getOutputStream(), fileService.getTimeReportTable(month, year, response));
+            zipService.writeToZip(response.getOutputStream(), fileService.getAllWorkBooks(month, year, response));
+            response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + month + ".zip\"");
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             log.error("Failed to create xml file", e);

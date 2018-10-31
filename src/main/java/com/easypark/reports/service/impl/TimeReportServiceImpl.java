@@ -38,7 +38,7 @@ public class TimeReportServiceImpl implements TimeReportService {
     }
 
     private List<TimeReport> createTimeReports(List<Issue> issues, CustomMonth month, HttpEntity headers) {
-        return issues.stream()
+        return issues.parallelStream()
                 .map(issue ->
                         reportClient.getWorkLogsByIssuesId(issue, headers, Arrays.asList(getAllGroups(timeReportProperties)))
                                 .getWorkLogs().stream()
