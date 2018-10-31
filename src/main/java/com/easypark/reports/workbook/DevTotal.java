@@ -63,10 +63,10 @@ public class DevTotal implements Runnable {
         createOrdinaryRow(totalSheet, rowNum++,
                 Lists.newArrayList("Developer", "Month total"), singletonList(colorCell));
         for (String user : users) {
-            try {
+            if (timeReports.containsKey(user)) {
                 createRows(totalSheet, NameCreator.createNameFromKey(user), rowNum++, timeReports.get(user), Lists.newArrayList(colorCell, styleAlignCenter));
-            } catch (Exception e) {
-                log.error("Not found time reports for user " + user);
+            } else {
+                log.info("Not found time reports for " + user);
             }
         }
         createOrdinaryRow(totalSheet, rowNum++,

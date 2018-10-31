@@ -79,7 +79,7 @@ public class DevReports implements Runnable {
         int weekInMonth;
         int maxWeek = 0;
         for (String key : allKeys) {
-            try {
+            if (timeReports.containsKey(key)) {
                 List<TimeReport> reports = timeReports.get(key).parallelStream()
                         .filter(timeReport -> timeReport.getTaskKey().matches(regex))
                         .collect(Collectors.toList());
@@ -90,8 +90,8 @@ public class DevReports implements Runnable {
                         maxWeek = weekInMonth;
                     }
                 }
-            } catch (Exception e) {
-                log.error("Not found time reports for user " + key);
+            } else {
+                log.info("Not found time reports for " + key);
             }
         }
         createSummarySheet(workBook.createSheet(SUMMARY_SHEET_NAME), devTimeTotals, styles, maxWeek);
