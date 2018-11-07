@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.IndexedColors;
@@ -24,7 +25,12 @@ public class WorkBookHelper {
         int iterator = 0;
         for (String value : values) {
             Cell cell = row.createCell(startCellNum++);
-            cell.setCellValue(value);
+            if (isDouble(value)) {
+                cell.setCellType(CellType.NUMERIC);
+                cell.setCellValue(new Double(value));
+            } else {
+                cell.setCellValue(value);
+            }
             cell.setCellStyle(styles.get(iterator));
             if (styles.size() > 1) {
                 iterator++;
@@ -80,18 +86,27 @@ public class WorkBookHelper {
     public static List<String> getTotal(Sheet sheet, int maxWeek, TotalService totalService) {
         if (maxWeek > 4) {
             return Lists.newArrayList("Total",
-                    String.valueOf(totalService.countTotal(sheet, 2)),
-                    String.valueOf(totalService.countTotal(sheet, 3)),
-                    String.valueOf(totalService.countTotal(sheet, 4)),
-                    String.valueOf(totalService.countTotal(sheet, 5)),
-                    String.valueOf(totalService.countTotal(sheet, 6)),
-                    String.valueOf(totalService.countTotal(sheet, 7)));
+                    totalService.countTotal(sheet, 2),
+                    totalService.countTotal(sheet, 3),
+                    totalService.countTotal(sheet, 4),
+                    totalService.countTotal(sheet, 5),
+                    totalService.countTotal(sheet, 6),
+                    totalService.countTotal(sheet, 7));
         }
         return Lists.newArrayList("Total",
-                String.valueOf(totalService.countTotal(sheet, 2)),
-                String.valueOf(totalService.countTotal(sheet, 3)),
-                String.valueOf(totalService.countTotal(sheet, 4)),
-                String.valueOf(totalService.countTotal(sheet, 5)),
-                String.valueOf(totalService.countTotal(sheet, 6)));
+                totalService.countTotal(sheet, 2),
+                totalService.countTotal(sheet, 3),
+                totalService.countTotal(sheet, 4),
+                totalService.countTotal(sheet, 5),
+                totalService.countTotal(sheet, 6));
+    }
+
+    public static boolean isDouble(String str) {
+        try {
+            Double.parseDouble(str);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

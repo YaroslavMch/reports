@@ -13,4 +13,5 @@ public class TimeReportProperties {
     private String[] server;
     private String[] app;
     private String[] web;
+    private String[] general;
 }

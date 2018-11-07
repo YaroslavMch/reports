@@ -4,10 +4,11 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 public enum DevGroup {
+    GENERAL("General", ".*"),
     SERVER_DEV("ServerDevelopment", ".*"),
     WEB_DEV("ParkingDashboard", ".*"),
-    EASY_PARK_APP("EPAppDevelopment", "NEWAPPS.*"),
-    MAPPER_APP("MapperAppDevelopment", "^(MAN.*|PGH.*)$");
+    EASY_PARK_APP("EPAppDevelopment", "(?!.*MAN.*).*"),
+    MAPPER_APP("MapperAppDevelopment", "^(MAN.*)$");
 
     private final String name;
     private final String regex;

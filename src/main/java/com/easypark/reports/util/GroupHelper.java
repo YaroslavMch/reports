@@ -31,6 +31,10 @@ public class GroupHelper {
                 group = timeReportProperties.getApp();
                 break;
             }
+            case GENERAL: {
+                group = timeReportProperties.getGeneral();
+                break;
+            }
         }
         return Arrays.stream(group)
                 .sorted()
