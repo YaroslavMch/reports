@@ -70,7 +70,7 @@ public class DevTotal implements Runnable {
             }
         }
         createOrdinaryRow(totalSheet, rowNum++,
-                Lists.newArrayList("Total", String.valueOf(totalService.countTotal(totalSheet, 2))), singletonList(colorCell));
+                Lists.newArrayList("Total", totalService.countTotal(totalSheet, 2)), singletonList(colorCell));
         return workBook;
     }
 

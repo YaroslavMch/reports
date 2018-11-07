@@ -55,10 +55,10 @@ public class DevReports implements Runnable {
     private void getTimeReportTable(Map<String, List<TimeReport>> timeReports,
                                     TimeReportProperties timeReportProperties) {
         this.workBooks = Arrays.stream(DevGroup.values())
+                .parallel()
                 .map(devGroup -> new GroupWorkBook(devGroup.getName(),
                         createTable(timeReports, GroupHelper.getGroup(timeReportProperties, devGroup), devGroup.getRegex())
                 )).collect(Collectors.toList());
-
     }
 
     private Workbook createTable(Map<String, List<TimeReport>> timeReports,
@@ -80,7 +80,8 @@ public class DevReports implements Runnable {
         int maxWeek = 0;
         for (String key : allKeys) {
             if (timeReports.containsKey(key)) {
-                List<TimeReport> reports = timeReports.get(key).parallelStream()
+                List<TimeReport> reports = timeReports.get(key)
+                        .parallelStream()
                         .filter(timeReport -> timeReport.getTaskKey().matches(regex))
                         .collect(Collectors.toList());
                 devTimeTotals.add(totalService.getDevTimes(reports, key));

@@ -42,14 +42,14 @@ public class TotalServiceImpl implements TotalService {
     }
 
     @Override
-    public double countTotal(Sheet sheet, int cellNum) {
+    public String countTotal(Sheet sheet, int cellNum) {
         double total = 0;
         int lastRowNum = sheet.getPhysicalNumberOfRows();
         for (int i = START_ROW_NUM + 1; i < lastRowNum + START_ROW_NUM; i++) {
             Row row = sheet.getRow(i);
             Cell cell = row.getCell(cellNum);
-            total += Double.parseDouble(cell.getStringCellValue());
+            total += cell.getNumericCellValue();
         }
-        return total;
+        return String.valueOf(total);
     }
 }

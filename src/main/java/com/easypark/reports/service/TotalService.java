@@ -9,5 +9,5 @@ import java.util.List;
 public interface TotalService {
     DevTimeTotal getDevTimes(List<TimeReport> timeReports, String user);
 
-    double countTotal(Sheet sheet, int cellNum);
+    String countTotal(Sheet sheet, int cellNum);
 }
