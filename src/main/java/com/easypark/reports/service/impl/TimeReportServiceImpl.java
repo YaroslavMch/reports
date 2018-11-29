@@ -7,7 +7,8 @@ import com.easypark.reports.entity.TimeReport;
 import com.easypark.reports.entity.jira.response.Issue;
 import com.easypark.reports.entity.jira.worklog.WorkReport;
 import com.easypark.reports.service.TimeReportService;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
@@ -24,10 +25,12 @@ import static com.easypark.reports.util.GroupHelper.getAllGroups;
 import static org.apache.logging.log4j.util.Strings.isEmpty;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class TimeReportServiceImpl implements TimeReportService {
     private final JiraTimeReportClient reportClient;
     private final TimeReportProperties timeReportProperties;
+    @Value("#{environment.JIRA_PASSWORD}")
+    private String password;
 
     @Override
     public Map<String, List<TimeReport>> getGroupedTimeReports(CustomMonth month) {
@@ -57,7 +60,7 @@ public class TimeReportServiceImpl implements TimeReportService {
 
     private HttpEntity createHeadersForClient() {
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", "Basic ");
+        headers.add("Authorization", "Basic "+ password);
         return new HttpEntity<>(headers);
     }
 
