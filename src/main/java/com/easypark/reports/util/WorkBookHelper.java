@@ -2,35 +2,28 @@ package com.easypark.reports.util;
 
 
 import com.easypark.reports.entity.DevTimeTotal;
-import com.easypark.reports.service.TotalService;
 import com.google.common.collect.Lists;
-import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.FillPatternType;
-import org.apache.poi.ss.usermodel.HorizontalAlignment;
-import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 
 import java.util.List;
 
-public class WorkBookHelper {
-    public static final int START_ROW_NUM = 4;
+import static com.easypark.reports.util.Constant.START_ROW_NUM;
+import static com.easypark.reports.util.StyleHelper.setWrap;
+import static com.easypark.reports.util.TotalHelper.getSumFormula;
 
+public class WorkBookHelper {
     public static Row createOrdinaryRow(Sheet sheet, int startRowNum, List<String> values, List<CellStyle> styles) {
         Row row = sheet.createRow(startRowNum);
+        row.setHeight((short) -1);
         int startCellNum = 1;
         int iterator = 0;
         for (String value : values) {
             Cell cell = row.createCell(startCellNum++);
-            if (isDouble(value)) {
-                cell.setCellType(CellType.NUMERIC);
-                cell.setCellValue(new Double(value));
-            } else {
-                cell.setCellValue(value);
-            }
+            setCellValue(cell, value);
             cell.setCellStyle(styles.get(iterator));
             if (styles.size() > 1) {
                 iterator++;
@@ -42,20 +35,6 @@ public class WorkBookHelper {
         return row;
     }
 
-    public static void createStyleForColorCell(CellStyle style) {
-        createBorder(style);
-        style.setFillForegroundColor(IndexedColors.SKY_BLUE.getIndex());
-        style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-        style.setAlignment(HorizontalAlignment.CENTER);
-    }
-
-    public static void createBorder(CellStyle style) {
-        style.setBorderBottom(BorderStyle.THIN);
-        style.setBorderTop(BorderStyle.THIN);
-        style.setBorderRight(BorderStyle.THIN);
-        style.setBorderLeft(BorderStyle.THIN);
-    }
-
     public static List<String> getHeaders(int maxWeek) {
         if (maxWeek > 4) {
             return Lists.newArrayList("Developer", "Week 1", "Week 2", "Week 3", "Week 4", "Week 5", "Total");
@@ -64,44 +43,40 @@ public class WorkBookHelper {
     }
 
     public static List<String> getTableData(int maxWeek, DevTimeTotal timeTotal) {
-        if (maxWeek > 4) {
-            return Lists.newArrayList(
-                    NameCreator.createNameFromKey(timeTotal.getDeveloperName()),
-                    String.valueOf(timeTotal.getWeeks().getOrDefault(1, 0.)),
-                    String.valueOf(timeTotal.getWeeks().getOrDefault(2, 0.)),
-                    String.valueOf(timeTotal.getWeeks().getOrDefault(3, 0.)),
-                    String.valueOf(timeTotal.getWeeks().getOrDefault(4, 0.)),
-                    String.valueOf(timeTotal.getWeeks().getOrDefault(5, 0.)),
-                    String.valueOf(timeTotal.getTotal()));
+        List<String> tableData = Lists.newArrayList(NameCreator.createNameFromKey(timeTotal.getDeveloperName()));
+        maxWeek = maxWeek + 1;
+        for (int i = 1; i < maxWeek; i++) {
+            tableData.add(String.valueOf(timeTotal.getWeeks().getOrDefault(i, 0.)));
         }
-        return Lists.newArrayList(
-                NameCreator.createNameFromKey(timeTotal.getDeveloperName()),
-                String.valueOf(timeTotal.getWeeks().getOrDefault(1, 0.)),
-                String.valueOf(timeTotal.getWeeks().getOrDefault(2, 0.)),
-                String.valueOf(timeTotal.getWeeks().getOrDefault(3, 0.)),
-                String.valueOf(timeTotal.getWeeks().getOrDefault(4, 0.)),
-                String.valueOf(timeTotal.getTotal()));
+        return tableData;
     }
 
-    public static List<String> getTotal(Sheet sheet, int maxWeek, TotalService totalService) {
-        if (maxWeek > 4) {
-            return Lists.newArrayList("Total",
-                    totalService.countTotal(sheet, 2),
-                    totalService.countTotal(sheet, 3),
-                    totalService.countTotal(sheet, 4),
-                    totalService.countTotal(sheet, 5),
-                    totalService.countTotal(sheet, 6),
-                    totalService.countTotal(sheet, 7));
+    public static List<String> getTotal(Sheet sheet, int maxWeek) {
+        int lastRow = sheet.getPhysicalNumberOfRows() + START_ROW_NUM;
+        List<String> total = Lists.newArrayList("Total");
+        maxWeek = maxWeek + 2;
+        for (int i = 2; i < maxWeek; i++) {
+            total.add(getSumFormula(sheet, i, i, START_ROW_NUM + 1, lastRow));
         }
-        return Lists.newArrayList("Total",
-                totalService.countTotal(sheet, 2),
-                totalService.countTotal(sheet, 3),
-                totalService.countTotal(sheet, 4),
-                totalService.countTotal(sheet, 5),
-                totalService.countTotal(sheet, 6));
+        return total;
     }
 
-    public static boolean isDouble(String str) {
+    private static void setCellValue(Cell cell, String value) {
+        if (value.matches("^(%reportsTotalFormula_.*)$")) {
+            cell.setCellType(CellType.FORMULA);
+            cell.setCellFormula(value.split("_")[1]);
+            return;
+        }
+        if (isDouble(value)) {
+            cell.setCellType(CellType.NUMERIC);
+            cell.setCellValue(new Double(value));
+            return;
+        }
+        value = setWrap(value);
+        cell.setCellValue(value);
+    }
+
+    private static boolean isDouble(String str) {
         try {
             Double.parseDouble(str);
             return true;

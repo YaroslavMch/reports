@@ -3,7 +3,6 @@ package com.easypark.reports.workbook;
 import com.easypark.reports.entity.DevTimeTotal;
 import com.easypark.reports.entity.GroupWorkBook;
 import com.easypark.reports.entity.TimeReport;
-import com.easypark.reports.service.TotalService;
 import com.easypark.reports.util.NameCreator;
 import com.google.common.collect.Lists;
 import lombok.Getter;
@@ -18,10 +17,12 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.util.List;
 import java.util.Map;
 
-import static com.easypark.reports.util.WorkBookHelper.START_ROW_NUM;
-import static com.easypark.reports.util.WorkBookHelper.createBorder;
+import static com.easypark.reports.util.Constant.START_ROW_NUM;
+import static com.easypark.reports.util.StyleHelper.createBorder;
+import static com.easypark.reports.util.StyleHelper.createStyleForColorCell;
+import static com.easypark.reports.util.TotalHelper.getDevTimes;
+import static com.easypark.reports.util.TotalHelper.getSumFormula;
 import static com.easypark.reports.util.WorkBookHelper.createOrdinaryRow;
-import static com.easypark.reports.util.WorkBookHelper.createStyleForColorCell;
 import static java.util.Collections.singletonList;
 
 @Slf4j
@@ -29,13 +30,11 @@ import static java.util.Collections.singletonList;
 public class DevTotal implements Runnable {
     private final Map<String, List<TimeReport>> timeReports;
     private final List<String> users;
-    private final TotalService totalService;
     private GroupWorkBook workBook;
 
-    public DevTotal(Map<String, List<TimeReport>> timeReports, List<String> users, TotalService totalService) {
+    public DevTotal(Map<String, List<TimeReport>> timeReports, List<String> users) {
         this.timeReports = timeReports;
         this.users = users;
-        this.totalService = totalService;
     }
 
     @Override
@@ -69,13 +68,14 @@ public class DevTotal implements Runnable {
                 log.info("Not found time reports for " + user);
             }
         }
+        String sumFormula = getSumFormula(totalSheet, 2, 2, START_ROW_NUM + 1, rowNum);
         createOrdinaryRow(totalSheet, rowNum++,
-                Lists.newArrayList("Total", totalService.countTotal(totalSheet, 2)), singletonList(colorCell));
+                Lists.newArrayList("Total", sumFormula), singletonList(colorCell));
         return workBook;
     }
 
     private void createRows(Sheet sheet, String name, int rowNum, List<TimeReport> timeReports, List<CellStyle> styles) {
-        DevTimeTotal devTimes = totalService.getDevTimes(timeReports, name);
+        DevTimeTotal devTimes = getDevTimes(timeReports, name);
         createOrdinaryRow(sheet, rowNum++, Lists.newArrayList(devTimes.getDeveloperName(), String.valueOf(devTimes.getTotal())),
                 Lists.newArrayList(styles.get(1)));
     }

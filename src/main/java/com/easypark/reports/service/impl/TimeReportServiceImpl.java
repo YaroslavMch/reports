@@ -50,7 +50,8 @@ public class TimeReportServiceImpl implements TimeReportService {
                                         workReport.getAuthor().getKey(),
                                         issue.getKey(), workReport.getStarted(),
                                         workReport.getTimeSpentSeconds() / 3600.,
-                                        isEmpty(workReport.getComment()) ? issue.getField().getSummary() : workReport.getComment()))
+                                        isEmpty(workReport.getComment()) ? issue.getField().getSummary() : workReport.getComment(),
+                                        issue.getField().getSummary()))
                                 .collect(Collectors.toList())
                 )
                 .flatMap(Collection::stream)
