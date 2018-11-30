@@ -1,23 +1,15 @@
-package com.easypark.reports.service.impl;
+package com.easypark.reports.util;
 
 import com.easypark.reports.entity.DevTimeTotal;
 import com.easypark.reports.entity.TimeReport;
-import com.easypark.reports.service.TotalService;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.springframework.stereotype.Service;
 
 import java.time.temporal.WeekFields;
 import java.util.List;
 
-import static com.easypark.reports.util.WorkBookHelper.START_ROW_NUM;
+public class TotalHelper {
 
-@Service
-public class TotalServiceImpl implements TotalService {
-
-    @Override
-    public DevTimeTotal getDevTimes(List<TimeReport> timeReports, String user) {
+    public static DevTimeTotal getDevTimes(List<TimeReport> timeReports, String user) {
         int rowCounter = 0;
         double timeInWeek = 0;
         double timeInMonth = 0;
@@ -41,15 +33,20 @@ public class TotalServiceImpl implements TotalService {
         return timeTotal;
     }
 
-    @Override
-    public String countTotal(Sheet sheet, int cellNum) {
-        double total = 0;
-        int lastRowNum = sheet.getPhysicalNumberOfRows();
-        for (int i = START_ROW_NUM + 1; i < lastRowNum + START_ROW_NUM; i++) {
-            Row row = sheet.getRow(i);
-            Cell cell = row.getCell(cellNum);
-            total += cell.getNumericCellValue();
+    public static String getSumFormula(Sheet sheet, int startCellNum, int endCellNum, int startRow, int endRow) {
+        if (endRow != startRow) {
+            endRow--;
         }
-        return String.valueOf(total);
+        String cellStart = sheet.getRow(startRow).getCell(startCellNum).getAddress().formatAsString();
+        String cellEnd = sheet.getRow(endRow).getCell(endCellNum).getAddress().formatAsString();
+        return Constant.FORMULA_PREFIX + "SUM(" + cellStart + ":" + cellEnd + ")";
+    }
+
+    public static String getSumMonthFormula(Sheet sheet, int cellNum, List<Integer> weekCellNum) {
+        String formula = Constant.FORMULA_PREFIX + "SUM(";
+        for (int num : weekCellNum) {
+            formula += sheet.getRow(num).getCell(cellNum).getAddress().formatAsString() + ",";
+        }
+        return formula.substring(0, formula.length() - 1) + ")";
     }
 }

@@ -6,7 +6,6 @@ import com.easypark.reports.entity.GroupWorkBook;
 import com.easypark.reports.entity.TimeReport;
 import com.easypark.reports.service.FileService;
 import com.easypark.reports.service.TimeReportService;
-import com.easypark.reports.service.TotalService;
 import com.easypark.reports.util.GroupHelper;
 import com.easypark.reports.util.MonthParser;
 import com.easypark.reports.workbook.DevReports;
@@ -30,7 +29,6 @@ import java.util.stream.Collectors;
 public class FileServiceImpl implements FileService {
     private final TimeReportService timeReportService;
     private final TimeReportProperties timeReportProperties;
-    private final TotalService totalService;
 
     @Override
     @SneakyThrows
@@ -48,8 +46,8 @@ public class FileServiceImpl implements FileService {
         List<String> sortedUsers = Arrays.stream(GroupHelper.getAllGroups(timeReportProperties))
                 .sorted()
                 .collect(Collectors.toList());
-        DevTotal devTotal = new DevTotal(timeReports, sortedUsers, totalService);
-        DevReports devReports = new DevReports(timeReports, timeReportProperties, totalService);
+        DevTotal devTotal = new DevTotal(timeReports, sortedUsers);
+        DevReports devReports = new DevReports(timeReports, timeReportProperties);
         Thread devTotalThread = new Thread(devTotal);
         Thread devReportsThread = new Thread(devReports);
         devTotalThread.start();

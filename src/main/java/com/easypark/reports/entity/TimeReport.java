@@ -13,6 +13,7 @@ public class TimeReport {
     private final LocalDate date;
     private final double timeSpent;
     private final String comment;
+    private final String summary;
 
     public double getTimeSpent() {
         return Math.round(timeSpent * 100) / (double) 100;
