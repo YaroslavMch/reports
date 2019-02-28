@@ -7,8 +7,8 @@ public enum DevGroup {
     GENERAL("General", ".*"),
     SERVER_DEV("ServerDevelopment", ".*"),
     WEB_DEV("ParkingDashboard", ".*"),
-    EASY_PARK_APP("EPAppDevelopment", "(?!.*MAN.*).*"),
-    MAPPER_APP("MapperAppDevelopment", "^(MAN.*)$");
+    EASY_PARK_APP("EPAppDevelopment", "^((?!MAN.*|PGH.*).)*$"),
+    MAPPER_APP("MapperAppDevelopment", "^(MAN.*)|^(PGH.*)*$");
 
     private final String name;
     private final String regex;
