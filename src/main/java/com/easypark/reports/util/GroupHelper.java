@@ -2,7 +2,6 @@ package com.easypark.reports.util;
 
 import com.easypark.reports.configuration.TimeReportProperties;
 import com.easypark.reports.entity.DevGroup;
-import com.google.common.collect.ObjectArrays;
 
 import java.util.Arrays;
 import java.util.List;
@@ -35,6 +34,10 @@ public class GroupHelper {
                 group = timeReportProperties.getGeneral();
                 break;
             }
+            case INNOVATION: {
+                group = timeReportProperties.getInnovation();
+                break;
+            }
         }
         return Arrays.stream(group)
                 .sorted()
@@ -42,7 +45,6 @@ public class GroupHelper {
     }
 
     public static String[] getAllGroups(TimeReportProperties timeReportProperties) {
-        return ObjectArrays.concat(ObjectArrays.concat(timeReportProperties.getServer(),
-                timeReportProperties.getApp(), String.class), timeReportProperties.getWeb(), String.class);
+        return timeReportProperties.getGeneral();
     }
 }

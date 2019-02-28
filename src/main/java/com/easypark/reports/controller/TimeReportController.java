@@ -27,8 +27,8 @@ public class TimeReportController {
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + month + ".zip\"");
             return ResponseEntity.ok().build();
         } catch (Exception e) {
-            log.error("Failed to create xml file", e);
-            return ResponseEntity.status(response.getStatus()).build();
+            log.error("Failed to create xml file", e.getMessage());
+            return ResponseEntity.status(response.getStatus()).body(e.getMessage());
         }
     }
 }

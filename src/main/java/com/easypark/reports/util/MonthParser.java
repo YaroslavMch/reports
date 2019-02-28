@@ -12,7 +12,8 @@ public class MonthParser {
 
     public static CustomMonth getMonthRange(String monthName, int year, HttpServletResponse httpResponse) {
         CustomMonth month;
-        switch (monthName) {
+        String monthUpperCase = monthName.toLowerCase();
+        switch (monthUpperCase) {
             case "january": {
                 month = new CustomMonth(Month.JANUARY, year);
                 break;

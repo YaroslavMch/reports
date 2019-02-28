@@ -14,4 +14,5 @@ public class TimeReportProperties {
     private String[] app;
     private String[] web;
     private String[] general;
+    private String[] innovation;
 }
