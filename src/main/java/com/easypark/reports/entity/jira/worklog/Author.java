@@ -8,5 +8,5 @@ import lombok.Setter;
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Author {
-    private String key;
+    private String displayName;
 }

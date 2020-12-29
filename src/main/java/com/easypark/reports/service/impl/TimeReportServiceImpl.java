@@ -47,7 +47,7 @@ public class TimeReportServiceImpl implements TimeReportService {
                                 .getWorkLogs().stream()
                                 .filter(comparingDate(month))
                                 .map(workReport -> new TimeReport(
-                                        workReport.getAuthor().getKey(),
+                                        createName(workReport.getAuthor().getDisplayName()),
                                         issue.getKey(), workReport.getStarted(),
                                         workReport.getTimeSpentSeconds() / 3600.,
                                         isEmpty(workReport.getComment()) ? issue.getField().getSummary() : workReport.getComment(),
@@ -59,9 +59,19 @@ public class TimeReportServiceImpl implements TimeReportService {
                 .collect(Collectors.toList());
     }
 
+    private String createName(String displayName) {
+        if ("Anastasiia Bilokon".equals(displayName)) {
+            return "astasiia.bilokon";
+        }
+        if ("Mikhailo Lisoviy".equals(displayName)) {
+            return "milkhailo.lisoviy";
+        }
+        return displayName.replaceAll(" ", ".").toLowerCase();
+    }
+
     private HttpEntity createHeadersForClient() {
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", "Basic "+ password);
+        headers.add("Authorization", "Basic " + password);
         return new HttpEntity<>(headers);
     }
 

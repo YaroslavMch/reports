@@ -19,6 +19,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -42,12 +43,14 @@ public class JiraTimeReportClientImpl implements JiraTimeReportClient {
 
     @Override
     public WorkLog getWorkLogsByIssuesId(Issue issue, HttpEntity headers, List<String> users) {
+        URI uriForWorkLogApi = createUriForWorkLogApi(issue.getId());
         WorkLog allWorks = restTemplate
-                .exchange(createUriForWorkLogApi(issue.getId()), HttpMethod.GET, headers, WorkLog.class)
+                .exchange(uriForWorkLogApi, HttpMethod.GET, headers, WorkLog.class)
                 .getBody();
-        return new WorkLog(allWorks.getWorkLogs().stream()
-                .filter(workReport -> users.contains(workReport.getAuthor().getKey()))
-                .collect(Collectors.toList()));
+        if (Objects.isNull(allWorks)) {
+            return new WorkLog();
+        }
+        return new WorkLog(allWorks.getWorkLogs());
     }
 
     private List<JiraResponse> getJiraResponse(CustomMonth month, HttpEntity headers) {
