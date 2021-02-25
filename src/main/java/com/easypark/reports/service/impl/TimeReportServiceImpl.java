@@ -66,6 +66,9 @@ public class TimeReportServiceImpl implements TimeReportService {
         if ("Mikhailo Lisoviy".equals(displayName)) {
             return "milkhailo.lisoviy";
         }
+        if ("Vitalii Horodetskyi".equals(displayName)) {
+            return "5fbe3451cbead50069310a6c";
+        }
         return displayName.replaceAll(" ", ".").toLowerCase();
     }
 
