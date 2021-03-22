@@ -1,7 +1,9 @@
 package com.easypark.reports.service;
 
-import com.easypark.reports.configuration.TimeReportProperties;
+import com.easypark.reports.entity.MonthReport;
+import com.easypark.reports.properties.TimeReportProperties;
 import com.easypark.reports.service.impl.FileServiceImpl;
+import com.easypark.reports.service.impl.WorkbookServiceImpl;
 import com.easypark.reports.util.MonthParser;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,7 +12,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -24,15 +27,20 @@ public class FileServiceImplTest {
     @InjectMocks
     private FileServiceImpl fileService;
     @Mock
-    private TimeReportService timeReportService;
+    private MonthReportService monthReportService;
     @Mock
-    private TimeReportProperties timeReportProperties;
+    private UserService userService;
+    @Mock
+    private WorkbookServiceImpl userReportServiceImpl;
 
-    @Test(expected = RuntimeException.class)
-    public void testGetAllWorkBooksNoReports(){
+
+    @Test()
+    public void testGetAllWorkBooksReports(){
         MockHttpServletResponse servletResponse = new MockHttpServletResponse();
-        when(timeReportService.getGroupedTimeReports(MonthParser.getMonthRange(MONTH, YEAR, servletResponse))).thenReturn(Collections.emptyMap());
-        fileService.getAllWorkBooks(MONTH, YEAR, servletResponse);
-        assertThat(servletResponse.getStatus(), is(500));
+        List<String> users = userService.getAllGroups();
+        MonthReport expectedReport = new MonthReport(4, List.of(), Map.of(), Map.of());
+        when(monthReportService.getUsersMonthReport(users, MonthParser.getMonthRange(MONTH, YEAR))).thenReturn(expectedReport);
+        fileService.getAllWorkBooks(MONTH, YEAR);
+        assertThat(servletResponse.getStatus(), is(200));
     }
 }

@@ -1,14 +1,13 @@
 package com.easypark.reports.util;
 
 
-import com.easypark.reports.entity.DevTimeTotal;
-import com.google.common.collect.Lists;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.easypark.reports.util.Constant.START_ROW_NUM;
@@ -37,23 +36,24 @@ public class WorkBookHelper {
 
     public static List<String> getHeaders(int maxWeek) {
         if (maxWeek > 4) {
-            return Lists.newArrayList("Developer", "Week 1", "Week 2", "Week 3", "Week 4", "Week 5", "Total");
+            return List.of("Developer", "Week 1", "Week 2", "Week 3", "Week 4", "Week 5", "Total");
         }
-        return Lists.newArrayList("Developer", "Week 1", "Week 2", "Week 3", "Week 4", "Total");
+        return List.of("Developer", "Week 1", "Week 2", "Week 3", "Week 4", "Total");
     }
 
-    public static List<String> getTableData(int maxWeek, DevTimeTotal timeTotal) {
-        List<String> tableData = Lists.newArrayList(NameCreator.createNameFromKey(timeTotal.getDeveloperName()));
-        maxWeek = maxWeek + 1;
-        for (int i = 1; i < maxWeek; i++) {
-            tableData.add(String.valueOf(timeTotal.getWeeks().getOrDefault(i, 0.)));
-        }
-        return tableData;
-    }
+//    public static List<String> getTableData(UserMonthReports timeTotal) {
+//        List<String> tableData = new ArrayList<>();
+//        tableData.add(timeTotal.getDeveloperName());
+//        for (int week: timeTotal.getWeekTotals().keySet()) {
+//            tableData.add(String.valueOf(timeTotal.getWeekTotals().get(week)));
+//        }
+//        return tableData;
+//    }
 
     public static List<String> getTotal(Sheet sheet, int maxWeek) {
         int lastRow = sheet.getPhysicalNumberOfRows() + START_ROW_NUM;
-        List<String> total = Lists.newArrayList("Total");
+        List<String> total = new ArrayList<>();
+        total.add("Total");
         maxWeek = maxWeek + 2;
         for (int i = 2; i < maxWeek; i++) {
             total.add(getSumFormula(sheet, i, i, START_ROW_NUM + 1, lastRow));

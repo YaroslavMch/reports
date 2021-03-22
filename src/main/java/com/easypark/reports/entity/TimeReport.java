@@ -1,22 +1,20 @@
 package com.easypark.reports.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Value;
 
 import java.time.LocalDate;
 
-@Getter
-@AllArgsConstructor
+@Value
 public class TimeReport {
-    private final String keyAuthor;
-    private final String taskKey;
-    private final LocalDate date;
-    private final double timeSpent;
-    private final String comment;
-    private final String summary;
+    String authorKey;
+    String issueKey;
+    LocalDate started;
+    double hoursSpent;
+    String comment;
+    String summary;
 
-    public double getTimeSpent() {
-        return Math.round(timeSpent * 100) / (double) 100;
+    public double getHoursSpent() {
+        return Math.round(hoursSpent * 100) / (double) 100;
     }
 
     public String getComment() {

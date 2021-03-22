@@ -12,10 +12,12 @@ import java.time.format.DateTimeFormatter;
 public class CustomMonth {
     private final LocalDate fromDate;
     private final LocalDate toDate;
+    private final int numberOfWeeks;
 
     public CustomMonth(Month month, int year) {
         DateTimeFormatter pattern = DateTimeFormatter.ofPattern("uuuu-M-d");
         this.fromDate = LocalDate.parse(year + "-" + month.getValue() + "-" + 1, pattern);
         this.toDate = LocalDate.parse(year + "-" + month.getValue() + "-" + month.maxLength(), pattern);
+        this.numberOfWeeks = toDate.lengthOfMonth() / 7 == 4 ? 4 : 5;
     }
 }

@@ -3,17 +3,16 @@ package com.easypark.reports.util;
 import com.easypark.reports.entity.CustomMonth;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.servlet.http.HttpServletResponse;
 import java.time.Month;
 
 @Slf4j
 public class MonthParser {
     private static final String ERROR_MESSAGE = "Month with name %s does not exist!";
 
-    public static CustomMonth getMonthRange(String monthName, int year, HttpServletResponse httpResponse) {
+    public static CustomMonth getMonthRange(String monthName, int year) {
         CustomMonth month;
-        String monthUpperCase = monthName.toLowerCase();
-        switch (monthUpperCase) {
+        String monthLowerCase = monthName.toLowerCase();
+        switch (monthLowerCase) {
             case "january": {
                 month = new CustomMonth(Month.JANUARY, year);
                 break;
@@ -64,7 +63,6 @@ public class MonthParser {
             }
             default: {
                 log.error(String.format(ERROR_MESSAGE, monthName));
-                httpResponse.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 throw new RuntimeException(String.format(ERROR_MESSAGE, monthName));
             }
         }
