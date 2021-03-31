@@ -1,9 +1,11 @@
 package com.easypark.reports.entity;
 
-import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-@AllArgsConstructor
-public enum DevGroup {
+@RequiredArgsConstructor
+@Getter
+public enum UserGroup {
     GENERAL("General", ".*"),
     SERVER_DEV("ServerDevelopment", ".*"),
     WEB_DEV("ParkingDashboard", ".*"),
@@ -13,12 +15,4 @@ public enum DevGroup {
 
     private final String name;
     private final String regex;
-
-    public String getRegex() {
-        return regex;
-    }
-
-    public String getName() {
-        return name;
-    }
 }

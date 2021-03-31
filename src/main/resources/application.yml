@@ -1,0 +1,46 @@
+jira:
+  domain: https://easypark.jira.com/rest/api/2/
+  illnessKey: MAN-6987
+  vacationKey: MAN-6986
+  password: ${JIRA_PASSWORD}
+
+groups:
+  general:
+    A.Rabinko: 557058:6f49b2a3-d126-4fd2-a102-08f2f5cef0c8
+    A.Yahimovich: 557058:02bfeb5e-2c18-4377-86c3-75aee3fef549
+    A.Dovgiy: 5e6246d6cad5f60af212231e
+    A.Bilokon: 557058:7fcfe396-656f-428c-94fa-1098504aae62
+    L.Rudych: 5f3fa91973a268004d942f46
+    M.Nikoliuk: 5cd41f517aecfb0fea317436
+    N.Golovatyuk: 557058:dd0d59d4-f4d4-40cd-ad44-371229f68c8a
+    O.Zaharova: 557058:b7ea60e2-a966-477c-ad90-468b6d58ca7b
+    O.Antoniuk: 5aaa34c2ef48102a7b9f044c
+    S.Belokon: 557058:dfb98b9e-1c31-4d53-9633-150760d6264c
+    S.Savchenko: 5b081d624ef4814c76810d91
+    S.Zagoruiko: 5d8cc4f8f2f0670dcb6d99c1
+    V.Mudryk: 557058:990c5fe4-5d97-4f17-92ee-9f8131c373f5
+    Y.Movchan: 5c3dd9d771c9f02df7755da5
+    Y.Yahimovich: 557058:0934cfb8-595e-47e3-a284-308fc79e4b89
+    V.Horodetskyi: 5fbe3451cbead50069310a6c
+    R.Shvets: 60193493a41ea5006a945ad6
+  server:
+    A.Rabinko: 557058:6f49b2a3-d126-4fd2-a102-08f2f5cef0c8
+    O.Antoniuk: 5aaa34c2ef48102a7b9f044c
+    S.Savchenko: 5b081d624ef4814c76810d91
+    S.Belokon: 557058:dfb98b9e-1c31-4d53-9633-150760d6264c
+    V.Mudryk: 557058:990c5fe4-5d97-4f17-92ee-9f8131c373f5
+    Y.Movchan: 5c3dd9d771c9f02df7755da5
+    L.Rudych: 5f3fa91973a268004d942f46
+  app:
+    A.Bilokon: 557058:7fcfe396-656f-428c-94fa-1098504aae62
+    Y.Yahimovich: 557058:0934cfb8-595e-47e3-a284-308fc79e4b89
+    A.Yahimovich: 557058:02bfeb5e-2c18-4377-86c3-75aee3fef549
+    N.Golovatyuk: 557058:dd0d59d4-f4d4-40cd-ad44-371229f68c8a
+    O.Zaharova: 557058:b7ea60e2-a966-477c-ad90-468b6d58ca7b
+    S.Zagoruiko: 5d8cc4f8f2f0670dcb6d99c1
+    V.Horodetskyi: 5fbe3451cbead50069310a6c
+  web:
+    R.Shvets: 60193493a41ea5006a945ad6
+    M.Nikoliuk: 5cd41f517aecfb0fea317436
+  innovation:
+    A.Dovgiy: 5e6246d6cad5f60af212231e

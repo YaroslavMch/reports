@@ -1,10 +1,10 @@
 package com.easypark.reports.service;
 
-import com.easypark.reports.entity.GroupWorkBook;
+import com.easypark.reports.entity.GroupWorkbook;
+import org.springframework.core.io.Resource;
 
-import java.io.OutputStream;
 import java.util.List;
 
 public interface ZipService {
-    void writeToZip(OutputStream outputStream, List<GroupWorkBook> workbooks);
+    Resource writeToZip(List<GroupWorkbook> workbooks);
 }

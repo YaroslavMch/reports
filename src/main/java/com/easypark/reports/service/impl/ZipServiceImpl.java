@@ -1,42 +1,42 @@
 package com.easypark.reports.service.impl;
 
-import com.easypark.reports.entity.GroupWorkBook;
-import com.easypark.reports.service.FileService;
+import com.easypark.reports.entity.GroupWorkbook;
 import com.easypark.reports.service.ZipService;
-import lombok.AllArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-@Slf4j
 @Service
-@AllArgsConstructor
 public class ZipServiceImpl implements ZipService {
-    private final FileService fileService;
 
     @Override
-    @SneakyThrows
-    public void writeToZip(OutputStream outputStream, List<GroupWorkBook> workbooks) {
-        ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream);
-        for (GroupWorkBook workbook : workbooks) {
-            try {
-                Workbook doc = workbook.getWorkbook();
-                ByteArrayOutputStream wbOutputStream = new ByteArrayOutputStream();
-                doc.write(wbOutputStream);
-                zipOutputStream.putNextEntry(new ZipEntry(workbook.getGroupName() + ".xls"));
-                wbOutputStream.writeTo(zipOutputStream);
-                zipOutputStream.closeEntry();
-            } catch (Exception e) {
-                log.error("File doesn't create");
+    public Resource writeToZip(List<GroupWorkbook> workbooks) {
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            writeToExel(workbooks, outputStream);
+            return new ByteArrayResource(outputStream.toByteArray());
+        } catch (IOException e) {
+            throw new RuntimeException("Can`t create zip archive!");
+        }
+    }
+
+    private void writeToExel(List<GroupWorkbook> workbooks, ByteArrayOutputStream outputStream) throws IOException {
+        try (ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream)) {
+            for (GroupWorkbook workbook : workbooks) {
+                try (ByteArrayOutputStream wbOutputStream = new ByteArrayOutputStream()) {
+                    Workbook doc = workbook.getWorkbook();
+                    doc.write(wbOutputStream);
+                    zipOutputStream.putNextEntry(new ZipEntry(workbook.getGroupName() + ".xls"));
+                    wbOutputStream.writeTo(zipOutputStream);
+                    zipOutputStream.closeEntry();
+                }
             }
         }
-        zipOutputStream.close();
     }
 }
