@@ -1,14 +1,14 @@
 package com.easypark.reports.service.impl;
 
-import com.easypark.reports.properties.JiraProperties;
 import com.easypark.reports.entity.*;
 import com.easypark.reports.service.MonthReportService;
-import com.easypark.reports.service.WorkbookService;
 import com.easypark.reports.service.UserService;
-import com.easypark.reports.util.NameCreator;
+import com.easypark.reports.service.WorkbookService;
+import com.easypark.reports.util.DateUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 
@@ -16,189 +16,191 @@ import java.time.temporal.WeekFields;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.easypark.reports.util.Constant.START_ROW_NUM;
-import static com.easypark.reports.util.StyleHelper.createBorder;
-import static com.easypark.reports.util.StyleHelper.createStyleForColorCell;
-import static com.easypark.reports.util.TotalHelper.getSumFormula;
-import static com.easypark.reports.util.TotalHelper.getSumMonthFormula;
-import static com.easypark.reports.util.WorkBookHelper.*;
+import static com.easypark.reports.util.Constant.*;
+import static com.easypark.reports.util.WorkbookUtils.*;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class WorkbookServiceImpl implements WorkbookService {
-    private static final String SUMMARY_SHEET_NAME = "Summary";
-
     private final UserService userService;
     private final MonthReportService monthReportService;
 
-    public List<GroupWorkBook> createUsersWorkbooks(MonthReport monthReport) {
-        List<GroupWorkBook> workBooks = Arrays.stream(DevGroup.values())
+    public List<GroupWorkbook> createUsersWorkbooks(MonthReport monthReport) {
+        List<GroupWorkbook> workbooks = Arrays.stream(UserGroup.values())
                 .parallel()
-                .map(devGroup -> new GroupWorkBook(devGroup.getName(),
-                        createTable(userService.getGroup(devGroup), devGroup.getRegex(), monthReport)
-                )).collect(Collectors.toList());
-        GroupWorkBook total = new GroupWorkBook("Total", createTotalWorkBook(monthReport));
-        workBooks.add(total);
-        return workBooks;
+                .map(group -> createGroupWorkbook(group, monthReport))
+                .collect(Collectors.toList());
+        workbooks.add(createTotalWorkbook(monthReport));
+        return workbooks;
     }
 
-    private Workbook createTotalWorkBook(MonthReport monthReport) {
-        Workbook workBook = new XSSFWorkbook();
-        Font font = workBook.createFont();
-        font.setBold(true);
-        CellStyle colorCell = workBook.createCellStyle();
-        colorCell.setFont(font);
-        createBorder(colorCell);
-        createStyleForColorCell(colorCell);
-        CellStyle styleAlignCenter = workBook.createCellStyle();
-        createBorder(styleAlignCenter);
-        styleAlignCenter.setAlignment(HorizontalAlignment.CENTER);
-        Sheet totalSheet = workBook.createSheet("Total");
-        writeReportsToTotalSheet(monthReport, colorCell, styleAlignCenter, totalSheet);
-        return workBook;
-    }
-
-    private void writeReportsToTotalSheet(MonthReport monthReport, CellStyle colorCell, CellStyle styleAlignCenter, Sheet totalSheet) {
-        double monthTotal = 0.0;
+    private GroupWorkbook createGroupWorkbook(UserGroup group, MonthReport monthReport) {
         int rowNum = START_ROW_NUM;
-        createOrdinaryRow(totalSheet, rowNum++, List.of("Developer", "Month total"), List.of(colorCell));
-        for (UserMonthReport report: monthReport.getUsersReports()) {
-            createOrdinaryRow(totalSheet, rowNum++, List.of(NameCreator.createNameFromKey(report.getDeveloperName()),
-                    String.valueOf(report.getWorkHours())), List.of(styleAlignCenter));
-            monthTotal += report.getWorkHours();
-        }
-        createOrdinaryRow(totalSheet, rowNum, List.of("Total", String.valueOf(monthTotal)), List.of(colorCell));
-        if (!monthReport.getUsersIllnessDays().isEmpty()) {
-            rowNum += START_ROW_NUM;
-            createOrdinaryRow(totalSheet, rowNum++, List.of("Developer", "Month illness total (days)"), List.of(colorCell));
-            for (String name: monthReport.getUsersIllnessDays().keySet()) {
-                createOrdinaryRow(totalSheet, rowNum, List.of(NameCreator.createNameFromKey(name),
-                        String.valueOf(monthReport.getUsersIllnessDays().get(name))), List.of(styleAlignCenter));
-            }
-        }
-        if (!monthReport.getUsersVacationDays().isEmpty()) {
-            rowNum += START_ROW_NUM;
-            createOrdinaryRow(totalSheet, rowNum++, List.of("Developer", "Month vacation total (days)"), List.of(colorCell));
-            for (String name: monthReport.getUsersVacationDays().keySet()) {
-                createOrdinaryRow(totalSheet, rowNum, List.of(NameCreator.createNameFromKey(name),
-                        String.valueOf(monthReport.getUsersVacationDays().get(name))), List.of(styleAlignCenter));
-            }
-        }
+        Workbook workbook = new XSSFWorkbook();
+        writeMonthSummary(group, monthReport, rowNum, workbook);
+        rowNum = START_ROW_NUM;
+        writeMonthReport(group, monthReport, rowNum, workbook);
+        autoSizeColumns(workbook);
+        return new GroupWorkbook(group.getName(), workbook);
     }
 
-    private Workbook createTable(List<String> users, String regex, MonthReport monthReport) {
-        Workbook workBook = new XSSFWorkbook();
-        Font font = workBook.createFont();
-        font.setBold(true);
-        CellStyle colorStyle = workBook.createCellStyle();
-        colorStyle.setFont(font);
-        CellStyle styleAlignCenter = workBook.createCellStyle();
-        CellStyle styleAlignLeft = workBook.createCellStyle();
-        createStyleForColorCell(colorStyle);
-        createBorder(styleAlignCenter);
-        createBorder(styleAlignLeft);
-        colorStyle.setWrapText(true);
-        styleAlignCenter.setWrapText(true);
-        styleAlignLeft.setWrapText(true);
-        styleAlignLeft.setAlignment(HorizontalAlignment.LEFT);
-        styleAlignLeft.setVerticalAlignment(VerticalAlignment.CENTER);
-        styleAlignCenter.setAlignment(HorizontalAlignment.CENTER);
-        styleAlignCenter.setVerticalAlignment(VerticalAlignment.CENTER);
-        writeReports(users, regex, workBook, colorStyle, styleAlignCenter, styleAlignLeft, monthReport);
-        return workBook;
-    }
-
-    private void writeReports(List<String> users, String regex, Workbook workBook,
-                              CellStyle colorStyle, CellStyle styleAlignCenter, CellStyle styleAlignLeft, MonthReport monthReport) {
-        List<CellStyle> styles = List.of(colorStyle, styleAlignCenter, styleAlignLeft);
-        for (UserMonthReport userMonthReport : monthReport.getUsersReports()) {
-            if (users.contains(userMonthReport.getDeveloperName())) {
-                List<TimeReport> reports = filterReports(userMonthReport.getReports(), regex);
-                if (!reports.isEmpty()) {
-                    createRows(workBook.createSheet(NameCreator.createNameFromKey(userMonthReport.getDeveloperName())), reports, styles);
-                } else {
-                    log.info("Not found time reports for " + userMonthReport.getDeveloperName());
-                }
-            }
-        }
-        createSummarySheet(workBook.createSheet(SUMMARY_SHEET_NAME), monthReport, styles, users, regex);
-        workBook.setSheetOrder(SUMMARY_SHEET_NAME, 0);
-    }
-
-    private List<TimeReport> filterReports(List<TimeReport> reports, String regex) {
-        return reports
-                .parallelStream()
-                .filter(timeReport -> timeReport.getIssueKey().matches(regex))
-                .collect(Collectors.toUnmodifiableList());
-    }
-
-    private int createRows(Sheet sheet, List<TimeReport> timeReports, List<CellStyle> styles) {
-        int startRow = START_ROW_NUM;
-        int endRow = START_ROW_NUM;
-        int weekInMonth = 1;
-        int weekCounter = 1;
-        List<Integer> weekCellNum = new ArrayList<>();
-        createOrdinaryRow(sheet, 3,
-                List.of("Date Started", "Key", "Name", "Time Spent (h)", "Work Description"), List.of(styles.get(0)));
-        for (TimeReport timeReport : timeReports) {
-            int currentWeek = timeReport.getStarted().get(WeekFields.ISO.weekOfMonth());
-            if (currentWeek > weekCounter) {
-                if (endRow > 4) {
-                    String formula = getSumFormula(sheet, 4, 4, startRow, endRow);
-                    weekCellNum.add(endRow);
-                    createOrdinaryRow(sheet, endRow++, List.of("Week " + weekCounter, "", "", formula, ""), List.of(styles.get(0)));
-                    startRow = endRow;
-                }
-                weekCounter = currentWeek;
-                if (weekCounter > weekInMonth) {
-                    weekInMonth = weekCounter;
-                }
-            }
-            createOrdinaryRow(sheet, endRow++,
-                    List.of(timeReport.getStarted().toString(), timeReport.getIssueKey(),
-                            timeReport.getSummary(), String.valueOf(timeReport.getHoursSpent()), timeReport.getComment()),
-                    List.of(styles.get(1), styles.get(1), styles.get(2), styles.get(1), styles.get(2)));
-        }
-        String weekFormula = getSumFormula(sheet, 4, 4, startRow, endRow);
-        weekCellNum.add(endRow);
-        createOrdinaryRow(sheet, endRow++, List.of("Week " + weekCounter, "", "", weekFormula, ""), List.of(styles.get(0)));
-        String monthFormula = getSumMonthFormula(sheet, 4, weekCellNum);
-        createOrdinaryRow(sheet, endRow, List.of("Total", "", "", monthFormula, ""), List.of(styles.get(0)));
-        return weekInMonth;
-    }
-
-    private void createSummarySheet(Sheet sheet, MonthReport monthReport, List<CellStyle> styles, List<String> users, String regex) {
+    private GroupWorkbook createTotalWorkbook(MonthReport monthReport) {
+        final String name = "Total";
         int rowNum = START_ROW_NUM;
-        int numberOfWeeks = monthReport.getNumberOfWeeks();
-        createOrdinaryRow(sheet, rowNum++, getHeaders(numberOfWeeks), List.of(styles.get(0)));
-        for (UserMonthReport userMonthReport : monthReport.getUsersReports()) {
-            if (users.contains(userMonthReport.getDeveloperName())) {
-                UserMonthReport filteredUserMonthReport = monthReportService.validateUserMonthReport(userMonthReport, regex);
-                    createOrdinaryRow(sheet, rowNum++, getTableData(numberOfWeeks, filteredUserMonthReport)
-                            , List.of(styles.get(1), styles.get(1), styles.get(1), styles.get(1), styles.get(1), styles.get(1), styles.get(0)));
+        Map<String, Double> illnessUsersDays = new HashMap<>();
+        Map<String, Double> vacationUsersDays = new HashMap<>();
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet totalSheet = workbook.createSheet(name);
+        writeTotal(monthReport, rowNum, illnessUsersDays, vacationUsersDays, workbook, totalSheet);
+        rowNum += START_ROW_NUM + monthReport.getUsersReports().size();
+        writeVacationOrIllnessReports(rowNum, workbook, totalSheet, vacationUsersDays, VACATION_HEADERS);
+        rowNum += START_ROW_NUM;
+        writeVacationOrIllnessReports(rowNum, workbook, totalSheet, illnessUsersDays, ILLNESS_HEADERS);
+        autoSizeColumns(workbook);
+        return new GroupWorkbook(name, workbook);
+    }
 
+    private void writeTotal(MonthReport monthReport, int rowNum, Map<String, Double> illnessUsersDays, Map<String, Double> vacationUsersDays, XSSFWorkbook workbook, XSSFSheet totalSheet) {
+        double monthHoursSum = 0;
+        writeValues(workbook, totalSheet.createRow(rowNum++), TOTAL_HEADERS);
+        for (UserMonthReport userMonthReport : monthReport.getUsersReports()) {
+            writeTotal(userMonthReport.getUser().getDisplayName(), userMonthReport.getWorkHours(), workbook, totalSheet.createRow(rowNum++));
+            monthHoursSum += userMonthReport.getWorkHours();
+            if (userMonthReport.getIllnessDays() > 0) {
+                illnessUsersDays.merge(userMonthReport.getUser().getDisplayName(), userMonthReport.getIllnessDays(), Double::sum);
+            }
+            if (userMonthReport.getVacationDays() > 0) {
+                vacationUsersDays.merge(userMonthReport.getUser().getDisplayName(), userMonthReport.getVacationDays(), Double::sum);
             }
         }
-        createOrdinaryRow(sheet, rowNum++, getTotal(sheet, numberOfWeeks), List.of(styles.get(0)));
-        int cellNum = numberOfWeeks + 2;
-        for (int i = START_ROW_NUM + 1; i < rowNum; i++) {
-            Cell cell = sheet.getRow(i).createCell(cellNum);
-            String formula = getSumFormula(sheet, 2, numberOfWeeks + 1, i, i);
-            cell.setCellStyle(styles.get(0));
-            cell.setCellType(CellType.FORMULA);
-            cell.setCellFormula(formula.split("_")[1]);
-            sheet.setColumnWidth(cellNum, 4000);
-            sheet.getRow(i).setHeight(sheet.getDefaultRowHeight());
+        writeValues(workbook, totalSheet.createRow(rowNum), List.of("Total" , String.valueOf(monthHoursSum)));
+    }
+
+    private void writeVacationOrIllnessReports(int rowNum, Workbook workbook, Sheet totalSheet, Map<String, Double> usersDays, List<String> headers) {
+        if (!usersDays.isEmpty()) {
+            writeValues(workbook, totalSheet.createRow(rowNum++),  headers);
+            for (String name : usersDays.keySet()) {
+                writeTotal(name, usersDays.get(name), workbook, totalSheet.createRow(rowNum++));
+            }
         }
     }
 
-    public static List<String> getTableData(int maxWeek, UserMonthReport userMonthReport) {
-        List<String> tableData = new ArrayList<>(List.of(NameCreator.createNameFromKey(userMonthReport.getDeveloperName())));
-        maxWeek = maxWeek + 1;
-        for (int i = 1; i < maxWeek; i++) {
-            tableData.add(String.valueOf(userMonthReport.getWeeksHours().getOrDefault(i, 0.0)));
+    private void writeTotal(String displayName, Double time, Workbook workbook, Row row) {
+        int cellNum = START_CELL_NUM;
+        CellStyle style = createStyle(workbook, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, false, false);
+        createCell(cellNum++, row, displayName, style);
+        createCell(cellNum, row, time, style);
+    }
+
+    private void writeMonthSummary(UserGroup group, MonthReport monthReport, int rowNum, Workbook workbook) {
+        Sheet summarySheet = workbook.createSheet("Summary");
+        int numberOfWeeks = DateUtils.getNumberOfWeeks(monthReport.getMonthRange());
+        List<String> headers = createSummaryHeader(numberOfWeeks);
+        writeValues(workbook, summarySheet.createRow(rowNum++), headers);
+        List<User> users = userService.getGroup(group);
+        Map<Integer, Double> weeksHoursSum = new HashMap<>();
+        double usersMonthHoursSum = 0;
+        for (User user : users) {
+            for (UserMonthReport userMonthReport : monthReport.getUsersReports()) {
+                if (user.getAccountId().equals(userMonthReport.getUser().getAccountId())) {
+                    UserMonthReport filteredUserReport = monthReportService.filterUserMonthReport(userMonthReport, group);
+                    for (Integer weekNum : filteredUserReport.getWeeksHours().keySet()) {
+                        weeksHoursSum.merge(weekNum, filteredUserReport.getWeeksHours().get(weekNum), Double::sum);
+                    }
+                    usersMonthHoursSum += filteredUserReport.getWorkHours();
+                    writeSummary(workbook, summarySheet.createRow(rowNum++), filteredUserReport, numberOfWeeks);
+                }
+            }
         }
-        return tableData;
+        writeSummaryTotal(workbook, summarySheet.createRow(rowNum), createSummaryBottom(weeksHoursSum, usersMonthHoursSum));
+    }
+
+    private void writeSummaryTotal(Workbook workbook, Row row, List<Double> weeksSum) {
+        int cellNum = START_CELL_NUM;
+        CellStyle style = createStyle(workbook, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, true, true);
+        createCell(cellNum++, row, "Total", style);
+        for (Double weekSum : weeksSum) {
+            createCell(cellNum++, row, weekSum, style);
+        }
+    }
+
+    private void writeMonthReport(UserGroup group, MonthReport monthReport, int rowNum, Workbook workbook) {
+        for (User user : userService.getGroup(group)) {
+            for (UserMonthReport userMonthReport : monthReport.getUsersReports()) {
+                if (user.getAccountId().equals(userMonthReport.getUser().getAccountId())) {
+                    UserMonthReport filteredUserReport = monthReportService.filterUserMonthReport(userMonthReport, group);
+                    if (!filteredUserReport.getReports().isEmpty()) {
+                        writeUserReports(rowNum, workbook, filteredUserReport);
+                    }
+                }
+            }
+            rowNum = START_ROW_NUM;
+        }
+    }
+
+    private void writeUserReports(int rowNum, Workbook workbook, UserMonthReport filteredUserReport) {
+        Sheet userSheet = workbook.createSheet(filteredUserReport.getUser().getDisplayName());
+        writeValues(workbook, userSheet.createRow(rowNum++), WORK_REPORTS_HEADERS);
+        for (Integer weekNum : filteredUserReport.getWeeksHours().keySet()) {
+            for (Report report : filteredUserReport.getReports()) {
+                if (report.getStarted().get(WeekFields.ISO.weekOfMonth()) == weekNum) {
+                    writeReport(workbook, userSheet.createRow(rowNum++), report);
+                }
+            }
+            Double weekHours = filteredUserReport.getWeeksHours().get(weekNum);
+            writeWeekTotal(workbook, userSheet.createRow(rowNum++), weekNum, weekHours);
+        }
+        writeMonthTotal(workbook, userSheet.createRow(rowNum), filteredUserReport.getWorkHours());
+    }
+
+    private void writeReport(Workbook workbook, Row row, Report report) {
+        int cellNum = START_CELL_NUM;
+        CellStyle alignCenterStyle = createStyle(workbook, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, false, false);
+        CellStyle alignLeftStyle = createStyle(workbook, HorizontalAlignment.LEFT, VerticalAlignment.CENTER, false, false);
+        createCell(cellNum++, row, report.getStarted().toString(), alignCenterStyle);
+        createCell(cellNum++, row, report.getIssueKey(), alignCenterStyle);
+        createCell(cellNum++, row, setWrap(report.getSummary()), alignLeftStyle);
+        createCell(cellNum++, row, report.getHoursSpent(), alignCenterStyle);
+        createCell(cellNum, row, setWrap(report.getComment()), alignLeftStyle);
+    }
+
+    private void writeSummary(Workbook workbook, Row row, UserMonthReport report, int numberOfWeeks) {
+        int cellNum = START_CELL_NUM;
+        CellStyle alignCenterStyle = createStyle(workbook, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, false, false);
+        CellStyle alignCenterBoldStyle = createStyle(workbook, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, true, true);
+        createCell(cellNum++, row, report.getUser().getDisplayName(), alignCenterStyle);
+        for (int i = 1; i <= numberOfWeeks; i++) {
+            createCell(cellNum++, row, report.getWeeksHours().getOrDefault(i, 0.0), alignCenterStyle);
+        }
+        createCell(cellNum, row, report.getWorkHours(), alignCenterBoldStyle);
+    }
+
+    private void writeValues(Workbook workbook, Row row, List<String> values) {
+        int cellNum = START_CELL_NUM;
+        CellStyle style = createStyle(workbook, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, true, true);
+        for (String header : values) {
+            createCell(cellNum++, row, header, style);
+        }
+    }
+
+    private void writeWeekTotal(Workbook workbook, Row row, int weekNum, double weekHours) {
+        int cellNum = START_CELL_NUM;
+        CellStyle style = createStyle(workbook, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, true, true);
+        createCell(cellNum++, row, "Week " + weekNum, style);
+        createCell(cellNum++, row, " ", style);
+        createCell(cellNum++, row, " ", style);
+        createCell(cellNum++, row, weekHours, style);
+        createCell(cellNum, row, " ", style);
+    }
+
+    private void writeMonthTotal(Workbook workbook, Row row, double monthHours) {
+        int cellNum = START_CELL_NUM;
+        CellStyle style = createStyle(workbook, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, true, true);
+        createCell(cellNum++, row, "Total", style);
+        createCell(cellNum++, row, " ", style);
+        createCell(cellNum++, row, " ", style);
+        createCell(cellNum++, row, monthHours, style);
+        createCell(cellNum, row, " ", style);
     }
 }

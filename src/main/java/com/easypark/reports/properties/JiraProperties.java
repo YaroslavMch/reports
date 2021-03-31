@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "jira")
 public class JiraProperties {
     private String domain;
-    private String path;
-    private String illKey;
+    private String illnessKey;
     private String vacationKey;
+    private String password;
 }

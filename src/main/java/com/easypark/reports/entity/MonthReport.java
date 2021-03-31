@@ -1,14 +1,13 @@
 package com.easypark.reports.entity;
 
 import lombok.Value;
+import org.apache.commons.lang3.Range;
 
+import java.time.chrono.ChronoLocalDate;
 import java.util.List;
-import java.util.Map;
 
 @Value
 public class MonthReport {
-    int numberOfWeeks;
+    Range<ChronoLocalDate> monthRange;
     List<UserMonthReport> usersReports;
-    Map<String, Double> usersIllnessDays;
-    Map<String, Double> usersVacationDays;
 }

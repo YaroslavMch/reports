@@ -1,30 +1,33 @@
 package com.easypark.reports.service.impl;
 
-import com.easypark.reports.entity.CustomMonth;
-import com.easypark.reports.entity.GroupWorkBook;
+import com.easypark.reports.entity.GroupWorkbook;
 import com.easypark.reports.entity.MonthReport;
-import com.easypark.reports.service.FileService;
-import com.easypark.reports.service.MonthReportService;
-import com.easypark.reports.service.UserService;
-import com.easypark.reports.util.MonthParser;
-import lombok.AllArgsConstructor;
+import com.easypark.reports.entity.UserGroup;
+import com.easypark.reports.service.*;
+import com.easypark.reports.util.DateUtils;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.Range;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
+import java.time.chrono.ChronoLocalDate;
 import java.util.List;
 
 @Slf4j
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class FileServiceImpl implements FileService {
     private final MonthReportService monthReportService;
     private final UserService userService;
-    private final WorkbookServiceImpl userReportServiceImpl;
+    private final WorkbookService userReportService;
+    private final ZipService zipService;
 
     @Override
-    public List<GroupWorkBook> getAllWorkBooks(String monthName, Integer year) {
-        CustomMonth monthRange = MonthParser.getMonthRange(monthName, year);
-        MonthReport monthReport = monthReportService.getUsersMonthReport(userService.getAllGroups(), monthRange);
-        return userReportServiceImpl.createUsersWorkbooks(monthReport);
+    public Resource getReportsResource(String monthName, Integer year) {
+        Range<ChronoLocalDate> monthRange = DateUtils.createMonthRange(monthName, year);
+        MonthReport monthReport = monthReportService.getUsersMonthReport(userService.getGroup(UserGroup.GENERAL), monthRange);
+        List<GroupWorkbook> usersWorkbooks = userReportService.createUsersWorkbooks(monthReport);
+        return zipService.writeToZip(usersWorkbooks);
     }
 }

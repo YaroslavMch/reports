@@ -7,10 +7,10 @@ import java.util.Map;
 
 @Value
 public class UserMonthReport {
-    String developerName;
+    User user;
     double workHours;
     double illnessDays;
     double vacationDays;
     Map<Integer, Double> weeksHours;
-    List<TimeReport> reports;
+    List<Report> reports;
 }

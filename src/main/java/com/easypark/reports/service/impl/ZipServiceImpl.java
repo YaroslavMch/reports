@@ -1,10 +1,10 @@
 package com.easypark.reports.service.impl;
 
-import com.easypark.reports.entity.GroupWorkBook;
+import com.easypark.reports.entity.GroupWorkbook;
 import com.easypark.reports.service.ZipService;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
@@ -13,30 +13,30 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-@Slf4j
 @Service
 public class ZipServiceImpl implements ZipService {
 
     @Override
-    public ByteArrayOutputStream writeToZip(List<GroupWorkBook> workbooks) throws IOException {
-        try (
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                ZipOutputStream zos = new ZipOutputStream(bos)
-        ) {
-            for (GroupWorkBook workbook : workbooks) {
+    public Resource writeToZip(List<GroupWorkbook> workbooks) {
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            writeToExel(workbooks, outputStream);
+            return new ByteArrayResource(outputStream.toByteArray());
+        } catch (IOException e) {
+            throw new RuntimeException("Can`t create zip archive!");
+        }
+    }
+
+    private void writeToExel(List<GroupWorkbook> workbooks, ByteArrayOutputStream outputStream) throws IOException {
+        try (ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream)) {
+            for (GroupWorkbook workbook : workbooks) {
                 try (ByteArrayOutputStream wbOutputStream = new ByteArrayOutputStream()) {
                     Workbook doc = workbook.getWorkbook();
                     doc.write(wbOutputStream);
-                    zos.putNextEntry(new ZipEntry(workbook.getGroupName() + ".xls"));
-                    wbOutputStream.writeTo(zos);
-                    zos.closeEntry();
+                    zipOutputStream.putNextEntry(new ZipEntry(workbook.getGroupName() + ".xls"));
+                    wbOutputStream.writeTo(zipOutputStream);
+                    zipOutputStream.closeEntry();
                 }
             }
-            return bos;
-        } catch (IOException e) {
-            String message = "File does not created!";
-            log.error(message);
-            throw new IOException(message);
         }
     }
 }

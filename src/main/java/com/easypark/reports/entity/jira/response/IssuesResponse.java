@@ -8,16 +8,13 @@ import java.util.List;
 
 @Value
 public class IssuesResponse {
-    int startAt;
     int total;
     List<Issue> issues;
 
     public IssuesResponse(
-            @JsonProperty("startAt") int startAt,
             @JsonProperty("total") int total,
             @JsonProperty("issues") List<Issue> issues
     ) {
-        this.startAt = startAt;
         this.total = total;
         this.issues = issues;
     }

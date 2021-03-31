@@ -1,11 +1,10 @@
 package com.easypark.reports.service;
 
-import com.easypark.reports.entity.GroupWorkBook;
+import com.easypark.reports.entity.GroupWorkbook;
+import org.springframework.core.io.Resource;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.List;
 
 public interface ZipService {
-    ByteArrayOutputStream writeToZip(List<GroupWorkBook> workbooks) throws IOException;
+    Resource writeToZip(List<GroupWorkbook> workbooks);
 }
