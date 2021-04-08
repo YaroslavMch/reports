@@ -19,20 +19,20 @@ public class ZipServiceImpl implements ZipService {
     @Override
     public Resource writeToZip(List<GroupWorkbook> workbooks) {
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-            writeToExel(workbooks, outputStream);
+            writeToExcel(workbooks, outputStream);
             return new ByteArrayResource(outputStream.toByteArray());
         } catch (IOException e) {
             throw new RuntimeException("Can`t create zip archive!");
         }
     }
 
-    private void writeToExel(List<GroupWorkbook> workbooks, ByteArrayOutputStream outputStream) throws IOException {
+    private void writeToExcel(List<GroupWorkbook> workbooks, ByteArrayOutputStream outputStream) throws IOException {
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream)) {
             for (GroupWorkbook workbook : workbooks) {
                 try (ByteArrayOutputStream wbOutputStream = new ByteArrayOutputStream()) {
                     Workbook doc = workbook.getWorkbook();
                     doc.write(wbOutputStream);
-                    zipOutputStream.putNextEntry(new ZipEntry(workbook.getGroupName() + ".xls"));
+                    zipOutputStream.putNextEntry(new ZipEntry(workbook.getGroupName() + ".xlsx"));
                     wbOutputStream.writeTo(zipOutputStream);
                     zipOutputStream.closeEntry();
                 }

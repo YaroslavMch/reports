@@ -1,6 +1,6 @@
 package com.easypark.reports.controller;
 
-import com.easypark.reports.service.FileService;
+import com.easypark.reports.service.MonthReportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping(value = "time-reports")
 public class MonthReportController {
-    private final FileService fileService;
+    private final MonthReportService monthReportService;
 
     @GetMapping(produces = "application/zip")
     public ResponseEntity<Resource> getReportsZipArchive(
@@ -24,6 +24,6 @@ public class MonthReportController {
         return ResponseEntity
                 .ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + month + ".zip")
-                .body(fileService.getReportsResource(month, year));
+                .body(monthReportService.getReportsResource(month, year));
     }
 }
