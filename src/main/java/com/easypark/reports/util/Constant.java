@@ -10,4 +10,7 @@ public class Constant {
     public static final List<String> TOTAL_HEADERS = List.of("Developer", "Month total");
     public static final List<String> ILLNESS_HEADERS = List.of("Developer", "Illness total (d)");
     public static final List<String> VACATION_HEADERS = List.of("Developer", "Vacation total (d)");
+    public static final String SUMMARY_SHEET_NAME = "Summary";
+    public static final String TOTAL_SHEET_NAME = "Total";
+    public static final String SUM_FORMULA_TEMPLATE = "SUM(%s)";
 }

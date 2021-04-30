@@ -15,19 +15,20 @@ import static java.time.temporal.TemporalAdjusters.lastDayOfMonth;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DateUtils {
 
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("d/M/yyyy");
+
     public static int getNumberOfWeeks(Range<ChronoLocalDate> monthRange) {
         return monthRange.getMaximum().lengthOfMonth() / (double) 7 > 4 ? 5 : 4;
     }
 
     public static Range<ChronoLocalDate> createMonthRange(String monthName, int year) {
-        DateTimeFormatter pattern = DateTimeFormatter.ofPattern("d/M/yyyy");
-        LocalDate firstDayOfMonth = LocalDate.parse(1 + "/" + parseMonth(monthName).getValue() + "/" + year, pattern);
+        LocalDate firstDayOfMonth = LocalDate.parse(1 + "/" + parseMonth(monthName).getValue() + "/" + year, DATE_TIME_FORMATTER);
         return Range.between(firstDayOfMonth, firstDayOfMonth.with(lastDayOfMonth()));
     }
 
     private static Month parseMonth(String monthName) {
         return Arrays.stream(Month.values())
-                .filter(month -> month.name().toLowerCase().equals(monthName))
+                .filter(month -> month.name().equalsIgnoreCase(monthName))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Can`t parse month: " + monthName));
     }

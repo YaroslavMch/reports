@@ -4,10 +4,12 @@ import com.easypark.reports.client.JiraClient;
 import com.easypark.reports.entity.*;
 import com.easypark.reports.entity.jira.worklog.WorkLog;
 import com.easypark.reports.properties.JiraProperties;
-import com.easypark.reports.service.MonthReportService;
+import com.easypark.reports.service.*;
+import com.easypark.reports.util.DateUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.Range;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
 import java.time.chrono.ChronoLocalDate;
@@ -25,22 +27,18 @@ public class MonthReportServiceImpl implements MonthReportService {
 
     private final JiraClient jiraClient;
     private final JiraProperties jiraProperties;
+    private final ZipService zipService;
+    private final UserService userService;
+    private final GroupWorkbookService groupWorkbookService;
+    private final TotalWorkbookService totalWorkbookService;
 
     @Override
-    public UserMonthReport filterUserMonthReport(UserMonthReport userMonthReport, UserGroup group) {
-        Map<Integer, Double> weeksWorkHours = new HashMap<>();
-        List<Report> filteredReports = new ArrayList<>();
-        double workHours = 0;
-        for (Report report : userMonthReport.getReports()) {
-            if (report.getIssueKey().matches(group.getRegex())) {
-                filteredReports.add(report);
-                workHours += report.getHoursSpent();
-                int week = report.getStarted().get(WeekFields.ISO.weekOfMonth());
-                weeksWorkHours.merge(week, report.getHoursSpent(), Double::sum);
-            }
-        }
-        return new UserMonthReport(userMonthReport.getUser(), workHours,
-                userMonthReport.getIllnessDays(), userMonthReport.getVacationDays(), weeksWorkHours, filteredReports);
+    public Resource getReportsResource(String monthName, Integer year) {
+        Range<ChronoLocalDate> monthRange = DateUtils.createMonthRange(monthName, year);
+        MonthReport monthReport = getUsersMonthReport(userService.getGroup(UserGroup.GENERAL), monthRange);
+        List<GroupWorkbook> usersWorkbooks = groupWorkbookService.createUsersWorkbooks(monthReport);
+        usersWorkbooks.add(totalWorkbookService.createTotalWorkbook(monthReport));
+        return zipService.writeToZip(usersWorkbooks);
     }
 
     @Override
@@ -55,21 +53,19 @@ public class MonthReportServiceImpl implements MonthReportService {
     private UserMonthReport getUserMonthReport(User user, Range<ChronoLocalDate> monthRange) {
         final double workDayHours = 8.0;
         List<Report> reports = new ArrayList<>();
-        double workHours = 0;
         double vacationHours = 0;
         double illnessHours = 0;
         Map<Integer, Double> weeksWorkHours = new HashMap<>();
         for (Issue issue : jiraClient.getUserMonthIssues(user.getAccountId(), monthRange)) {
             for (WorkLog workLog : jiraClient.getWorkLogs(issue.getKey())) {
                 if (monthRange.contains(workLog.getStarted())) {
-                    if (isValidAuthor(user.getAccountId(), workLog.getAuthor())) {
+                    if (user.getAccountId().equals(workLog.getAuthor().getAccountId())) {
                         double timeSpentHours = workLog.getTimeSpentSeconds() / ONE_HOUR_IN_SECONDS;
                         if (issue.getKey().equals(jiraProperties.getIllnessKey())) {
                             illnessHours += timeSpentHours;
                         } else if (issue.getKey().equals(jiraProperties.getVacationKey())) {
                             vacationHours += timeSpentHours;
                         } else {
-                            workHours += timeSpentHours;
                             int week = workLog.getStarted().get(WeekFields.ISO.weekOfMonth());
                             weeksWorkHours.merge(week, timeSpentHours, Double::sum);
                             reports.add(buildReport(issue, workLog));
@@ -78,7 +74,7 @@ public class MonthReportServiceImpl implements MonthReportService {
                 }
             }
         }
-        return new UserMonthReport(user, workHours, illnessHours / workDayHours,
+        return new UserMonthReport(user, illnessHours / workDayHours,
                 vacationHours / workDayHours, weeksWorkHours, sortReportsByDate(reports));
     }
 
@@ -96,9 +92,5 @@ public class MonthReportServiceImpl implements MonthReportService {
                 workLog.getTimeSpentSeconds() / ONE_HOUR_IN_SECONDS,
                 isBlank(workLog.getComment()) ? issue.getSummary() : workLog.getComment(),
                 issue.getSummary());
-    }
-
-    private boolean isValidAuthor(String accountId, User author) {
-        return accountId.equals(author.getAccountId());
     }
 }
