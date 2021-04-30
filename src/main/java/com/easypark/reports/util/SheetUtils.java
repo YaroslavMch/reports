@@ -25,14 +25,22 @@ public class SheetUtils {
         for (int i = 0; i < numberOfSheets; i++) {
             Sheet sheet = workbook.getSheetAt(i);
             if (sheet.getPhysicalNumberOfRows() > 0) {
-                Row row = sheet.getRow(sheet.getFirstRowNum());
-                Iterator<Cell> cellIterator = row.cellIterator();
-                while (cellIterator.hasNext()) {
-                    Cell cell = cellIterator.next();
-                    int columnIndex = cell.getColumnIndex();
-                    sheet.autoSizeColumn(columnIndex);
-                }
+                autoSizeRows(sheet);
             }
         }
+    }
+
+    private static void autoSizeRows(Sheet sheet) {
+        Row row = sheet.getRow(sheet.getFirstRowNum());
+        Iterator<Cell> cellIterator = row.cellIterator();
+        while (cellIterator.hasNext()) {
+            autoSizeCell(cellIterator, sheet);
+        }
+    }
+
+    private static void autoSizeCell(Iterator<Cell> cellIterator, Sheet sheet) {
+        Cell cell = cellIterator.next();
+        int columnIndex = cell.getColumnIndex();
+        sheet.autoSizeColumn(columnIndex);
     }
 }

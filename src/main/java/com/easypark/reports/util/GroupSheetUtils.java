@@ -8,6 +8,7 @@ import org.apache.poi.ss.usermodel.*;
 import java.util.List;
 
 import static com.easypark.reports.util.Constant.*;
+import static org.apache.commons.text.WordUtils.wrap;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class GroupSheetUtils {
@@ -42,9 +43,9 @@ public class GroupSheetUtils {
         CellStyle borderedOnLeft = StylesUtils.getBordered(sheet.getWorkbook(), HorizontalAlignment.LEFT);
         addCell(startCellNum++, row, report.getStarted().toString(), borderedOnCenter);
         addCell(startCellNum++, row, report.getIssueKey(), borderedOnCenter);
-        addCell(startCellNum++, row, setWrap(report.getSummary()), borderedOnLeft);
+        addCell(startCellNum++, row, wrap(report.getSummary(), MAX_STRING_LENGTH), borderedOnLeft);
         addCell(startCellNum++, row, report.getHoursSpent(), borderedOnCenter);
-        addCell(startCellNum, row, setWrap(report.getComment()), borderedOnLeft);
+        addCell(startCellNum, row, wrap(report.getComment(), MAX_STRING_LENGTH), borderedOnLeft);
         return row.getRowNum();
     }
 
@@ -83,16 +84,5 @@ public class GroupSheetUtils {
         style.setAlignment(HorizontalAlignment.CENTER);
         cell.setCellStyle(style);
         cell.setCellFormula(String.format(SUM_FORMULA_TEMPLATE, String.join(", ", weekTotalsIndexes)));
-    }
-
-    private static String setWrap(String value) {
-        int length = value.length();
-        if (length > MAX_STRING_LENGTH) {
-            int index = value.indexOf(" ", MAX_STRING_LENGTH);
-            if (index > 0) {
-                value = value.substring(0, index) + "\n" + setWrap(value.substring(index + 1));
-            }
-        }
-        return value;
     }
 }

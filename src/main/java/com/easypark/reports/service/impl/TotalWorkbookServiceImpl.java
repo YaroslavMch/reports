@@ -38,8 +38,7 @@ public class TotalWorkbookServiceImpl implements TotalWorkbookService {
     }
 
     private int writeVacationReports(MonthReport monthReport, int rowNum, Sheet totalSheet) {
-        int startRow = rowNum;
-        startRow = addHeaderRow(startRow, totalSheet, VACATION_HEADERS) + 1;
+        int startRow = addHeaderRow(rowNum, totalSheet, VACATION_HEADERS) + 1;
         for (UserMonthReport userMonthReport : monthReport.getUsersReports()) {
             if (userMonthReport.getVacationDays() > 0) {
                 startRow = addVacationRow(startRow, totalSheet, userMonthReport) + 1;
@@ -49,13 +48,11 @@ public class TotalWorkbookServiceImpl implements TotalWorkbookService {
     }
 
     private int writeReportsHours(MonthReport monthReport, int rowNum, Sheet totalSheet) {
-        int startRow = rowNum;
-        startRow = addHeaderRow(startRow, totalSheet, TOTAL_HEADERS) + 1;
+        int startRow = addHeaderRow(rowNum, totalSheet, TOTAL_HEADERS) + 1;
         int firstHourRowIndex = startRow;
         for (UserMonthReport userMonthReport : monthReport.getUsersReports()) {
             startRow = addRow(startRow, totalSheet, userMonthReport) + 1;
         }
         return addTotalRow(startRow, totalSheet, firstHourRowIndex) + 1;
     }
-
 }
