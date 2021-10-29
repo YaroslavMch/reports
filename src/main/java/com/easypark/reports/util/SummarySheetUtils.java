@@ -30,7 +30,7 @@ public class SummarySheetUtils {
         int startCellIndex = START_CELL_NUM;
         CellStyle borderedStyle = StylesUtils.getBordered(row.getSheet().getWorkbook(), HorizontalAlignment.CENTER);
         addCell(startCellIndex++, row, userMonthReport.getUser().getDisplayName(), borderedStyle);
-        for (int i = 1; i <= numOfWeeks; i++) {
+        for (int i = 0; i <= numOfWeeks - 1; i++) {
             addCell(startCellIndex++, row, userMonthReport.getWeeksHours().getOrDefault(i, 0.0), borderedStyle);
         }
         String firstWeekAddress = row.getCell(row.getFirstCellNum() + 1).getAddress().formatAsString();

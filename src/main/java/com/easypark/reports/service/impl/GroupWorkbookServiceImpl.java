@@ -85,7 +85,7 @@ public class GroupWorkbookServiceImpl implements GroupWorkbookService {
     private Map<Integer, List<Report>> getWeeksReports(UserMonthReport filteredUserReport, int numberOfWeeks) {
         Map<Integer, List<Report>> weeksReports = new LinkedHashMap<>();
         for (int i = 1; i <= numberOfWeeks; i++) {
-            weeksReports.put(i, findUserWeekReports(i, filteredUserReport));
+            weeksReports.put(i, findUserWeekReports(i - 1, filteredUserReport));
         }
         return weeksReports;
     }
