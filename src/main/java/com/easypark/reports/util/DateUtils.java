@@ -4,10 +4,13 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.Range;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.chrono.ChronoLocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalField;
+import java.time.temporal.WeekFields;
 import java.util.Arrays;
 
 import static java.time.temporal.TemporalAdjusters.lastDayOfMonth;
@@ -16,6 +19,8 @@ import static java.time.temporal.TemporalAdjusters.lastDayOfMonth;
 public class DateUtils {
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("d/M/yyyy");
+
+    public static final TemporalField WEEK_OF_MONTH = WeekFields.of(DayOfWeek.MONDAY, 1).weekOfMonth();
 
     public static int getNumberOfWeeks(Range<ChronoLocalDate> monthRange) {
         return monthRange.getMaximum().lengthOfMonth() / (double) 7 > 4 ? 5 : 4;
