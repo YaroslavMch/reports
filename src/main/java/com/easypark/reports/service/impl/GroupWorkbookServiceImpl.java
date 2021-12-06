@@ -8,16 +8,19 @@ import com.easypark.reports.util.GroupSheetUtils;
 import com.easypark.reports.util.SummarySheetUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 
-import java.time.temporal.WeekFields;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.easypark.reports.util.Constant.*;
-import static com.easypark.reports.util.SheetUtils.*;
+import static com.easypark.reports.util.Constant.START_ROW_NUM;
+import static com.easypark.reports.util.Constant.SUMMARY_SHEET_NAME;
+import static com.easypark.reports.util.DateUtils.WEEK_OF_MONTH;
+import static com.easypark.reports.util.SheetUtils.autoSizeColumns;
 
 @Service
 @RequiredArgsConstructor
@@ -85,14 +88,14 @@ public class GroupWorkbookServiceImpl implements GroupWorkbookService {
     private Map<Integer, List<Report>> getWeeksReports(UserMonthReport filteredUserReport, int numberOfWeeks) {
         Map<Integer, List<Report>> weeksReports = new LinkedHashMap<>();
         for (int i = 1; i <= numberOfWeeks; i++) {
-            weeksReports.put(i, findUserWeekReports(i - 1, filteredUserReport));
+            weeksReports.put(i, findUserWeekReports(i, filteredUserReport));
         }
         return weeksReports;
     }
 
     private List<Report> findUserWeekReports(int week, UserMonthReport userMonthReport) {
         return userMonthReport.getReports().parallelStream()
-                .filter(report -> report.getStarted().get(WeekFields.ISO.weekOfMonth()) == week)
+                .filter(report -> report.getStarted().get(WEEK_OF_MONTH) == week)
                 .collect(Collectors.toUnmodifiableList());
     }
 
@@ -108,7 +111,7 @@ public class GroupWorkbookServiceImpl implements GroupWorkbookService {
         for (Report report : userMonthReport.getReports()) {
             if (report.getIssueKey().matches(group.getRegex())) {
                 filteredReports.add(report);
-                int week = report.getStarted().get(WeekFields.ISO.weekOfMonth());
+                int week = report.getStarted().get(WEEK_OF_MONTH);
                 weeksWorkHours.merge(week, report.getHoursSpent(), Double::sum);
             }
         }

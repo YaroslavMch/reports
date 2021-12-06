@@ -13,10 +13,11 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
 import java.time.chrono.ChronoLocalDate;
-import java.time.temporal.WeekFields;
 import java.util.*;
 import java.util.stream.Collectors;
 
+
+import static com.easypark.reports.util.DateUtils.WEEK_OF_MONTH;
 import static org.apache.logging.log4j.util.Strings.isBlank;
 
 @Service
@@ -66,7 +67,7 @@ public class MonthReportServiceImpl implements MonthReportService {
                         } else if (issue.getKey().equals(jiraProperties.getVacationKey())) {
                             vacationHours += timeSpentHours;
                         } else {
-                            int week = workLog.getStarted().get(WeekFields.ISO.weekOfMonth());
+                            int week = workLog.getStarted().get(WEEK_OF_MONTH);
                             weeksWorkHours.merge(week, timeSpentHours, Double::sum);
                             reports.add(buildReport(issue, workLog));
                         }
