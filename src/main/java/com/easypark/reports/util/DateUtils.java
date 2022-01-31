@@ -23,7 +23,7 @@ public class DateUtils {
     public static final TemporalField WEEK_OF_MONTH = WeekFields.of(DayOfWeek.MONDAY, 1).weekOfMonth();
 
     public static int getNumberOfWeeks(Range<ChronoLocalDate> monthRange) {
-        return monthRange.getMaximum().lengthOfMonth() / (double) 7 > 4 ? 5 : 4;
+        return monthRange.getMaximum().get(WEEK_OF_MONTH);
     }
 
     public static Range<ChronoLocalDate> createMonthRange(String monthName, int year) {
