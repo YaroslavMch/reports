@@ -13,4 +13,6 @@ public class Constant {
     public static final String SUMMARY_SHEET_NAME = "Summary";
     public static final String TOTAL_SHEET_NAME = "Total";
     public static final String SUM_FORMULA_TEMPLATE = "SUM(%s)";
+    public static final String NUMERIC_FORMAT = "#.###";
+    public static final double ROUNDING_TO_DIGIT = 100.00;//10^(number of digits after coma)
 }

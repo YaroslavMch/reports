@@ -17,6 +17,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 
+import static com.easypark.reports.util.Constant.ROUNDING_TO_DIGIT;
 import static com.easypark.reports.util.DateUtils.WEEK_OF_MONTH;
 import static org.apache.logging.log4j.util.Strings.isBlank;
 
@@ -61,7 +62,8 @@ public class MonthReportServiceImpl implements MonthReportService {
             for (WorkLog workLog : jiraClient.getWorkLogs(issue.getKey())) {
                 if (monthRange.contains(workLog.getStarted())) {
                     if (user.getAccountId().equals(workLog.getAuthor().getAccountId())) {
-                        double timeSpentHours = workLog.getTimeSpentSeconds() / ONE_HOUR_IN_SECONDS;
+                        double timeSpentHoursNotRound = workLog.getTimeSpentSeconds() / ONE_HOUR_IN_SECONDS;
+                        double timeSpentHours = Math.round(timeSpentHoursNotRound * ROUNDING_TO_DIGIT) / ROUNDING_TO_DIGIT;
                         if (issue.getKey().equals(jiraProperties.getIllnessKey())) {
                             illnessHours += timeSpentHours;
                         } else if (issue.getKey().equals(jiraProperties.getVacationKey())) {
