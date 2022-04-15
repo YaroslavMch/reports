@@ -4,6 +4,8 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
 
+import static com.easypark.reports.util.Constant.NUMERIC_FORMAT;
+
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class StylesUtils {
 
@@ -17,6 +19,7 @@ public class StylesUtils {
         cellStyle.setBorderTop(BorderStyle.THIN);
         cellStyle.setBorderRight(BorderStyle.THIN);
         cellStyle.setBorderLeft(BorderStyle.THIN);
+        cellStyle.setDataFormat(workbook.createDataFormat().getFormat(NUMERIC_FORMAT));
         return cellStyle;
     }
 

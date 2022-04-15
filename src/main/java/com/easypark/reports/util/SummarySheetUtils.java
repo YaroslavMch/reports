@@ -70,7 +70,7 @@ public class SummarySheetUtils {
         for (int i = 1; i <= numberOfWeeks; i++) {
             cells.add("Week " + i);
         }
-        cells.add("Total");
+        cells.add("     Total     ");
         return cells;
     }
 }
