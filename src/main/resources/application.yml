@@ -17,11 +17,16 @@ groups:
     R.Shvets: 60193493a41ea5006a945ad6
     V.Kopytsia: 60ab78470c6f2d006841c370
     I.Olhovoy: 61558afcc5388b006934bb08
+    I.Slobodian: 6267cc634297890069460aee
+    S.Husak: 6260056626478a00681e3afb
+    O.Stadnik: 626bca11185ac2006932ee47
   server:
     O.Antoniuk: 5aaa34c2ef48102a7b9f044c
     Y.Movchan: 5c3dd9d771c9f02df7755da5
     V.Kopytsia: 60ab78470c6f2d006841c370
     I.Olhovoy: 61558afcc5388b006934bb08
+    I.Slobodian: 6267cc634297890069460aee
+    S. Husak: 6260056626478a00681e3afb
   app:
     Y.Yahimovich: 557058:0934cfb8-595e-47e3-a284-308fc79e4b89
     A.Yahimovich: 557058:02bfeb5e-2c18-4377-86c3-75aee3fef549
@@ -30,5 +35,6 @@ groups:
   web:
     R.Shvets: 60193493a41ea5006a945ad6
     M.Nikoliuk: 5cd41f517aecfb0fea317436
+    O.Stadnik: 626bca11185ac2006932ee47
   innovation:
     A.Dovgiy: 5e6246d6cad5f60af212231e
