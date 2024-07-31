@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(value = "time-reports")
+    @RequestMapping(value = "time-reports")
 public class MonthReportController {
     private final MonthReportService monthReportService;
 

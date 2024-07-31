@@ -21,12 +21,10 @@ public class UserServiceImpl implements UserService {
 
     public UserServiceImpl(UserGroupProperties userGroupProperties) {
         this.userGroups = Map.of(
-                SERVER_DEV, userGroupProperties::getServer,
-                WEB_DEV, userGroupProperties::getWeb,
-                EASY_PARK_APP, userGroupProperties::getApp,
-                MAPPER_APP, userGroupProperties::getApp,
                 GENERAL, userGroupProperties::getGeneral,
-                INNOVATION, userGroupProperties::getInnovation);
+                OPERATORS_EXPERIENCE, userGroupProperties::getOperatorsExperience,
+                DRIVERS_EXPERIENCE, userGroupProperties::getDriversExperience,
+                EASY_PARKERS_EXPERIENCE, userGroupProperties::getEasyParkersExperience);
     }
 
     @SneakyThrows
