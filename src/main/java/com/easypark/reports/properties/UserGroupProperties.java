@@ -12,9 +12,9 @@ import java.util.Map;
 @Configuration
 @ConfigurationProperties(prefix = "groups")
 public class UserGroupProperties {
-    private Map<String, String> server;
-    private Map<String, String> app;
-    private Map<String, String> web;
     private Map<String, String> general;
-    private Map<String, String> innovation;
+    private Map<String, String> easyParkersExperience;
+    private Map<String, String> driversExperience;
+    private Map<String, String> operatorsExperience;
+
 }
