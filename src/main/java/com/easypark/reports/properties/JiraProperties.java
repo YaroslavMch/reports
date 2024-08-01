@@ -13,5 +13,6 @@ public class JiraProperties {
     private String domain;
     private String illnessKey;
     private String vacationKey;
-    private String password;
+    private String email;
+    private String apiToken;
 }

@@ -2,13 +2,13 @@ jira:
   domain: https://easypark.jira.com/rest/api/2/
   illnessKey: MAN-6987
   vacationKey: MAN-6986
-  password: ${JIRA_PASSWORD}
+  email: ${USER_EMAIL} # https://developer.atlassian.com/cloud/jira/platform/basic-auth-for-rest-apis
+  apiToken: ${API_TOKEN} # https://id.atlassian.com/manage-profile/security/api-tokens
 
 groups:
   general:
     A.Yahimovich: 557058:02bfeb5e-2c18-4377-86c3-75aee3fef549
     A.Dovgiy: 5e6246d6cad5f60af212231e
-#    M.Nikoliuk: 5cd41f517aecfb0fea317436
     O.Zaharova: 557058:b7ea60e2-a966-477c-ad90-468b6d58ca7b
     O.Antoniuk: 5aaa34c2ef48102a7b9f044c
     Y.Movchan: 5c3dd9d771c9f02df7755da5
@@ -22,7 +22,6 @@ groups:
     O.Stadnik: 626bca11185ac2006932ee47
   easyParkersExperience:
     R.Shvets: 60193493a41ea5006a945ad6
-#    M.Nikoliuk: 5cd41f517aecfb0fea317436
     O.Stadnik: 626bca11185ac2006932ee47
   driversExperience:
     Y.Yahimovich: 557058:0934cfb8-595e-47e3-a284-308fc79e4b89

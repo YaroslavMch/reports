@@ -9,8 +9,6 @@ import com.easypark.reports.properties.JiraProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.Range;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -35,7 +33,7 @@ public class JiraClientImpl implements JiraClient {
     @Override
     public List<WorkLog> getWorkLogs(String issueKey) {
         URI uri = buildSearchWorkLogsUri(issueKey);
-        WorkLogsResponse workLogsResponse = restTemplate.exchange(uri, HttpMethod.GET, getAuthHttpEntity(), WorkLogsResponse.class).getBody();
+        WorkLogsResponse workLogsResponse = restTemplate.exchange(uri, HttpMethod.GET, null, WorkLogsResponse.class).getBody();
         if (Objects.isNull(workLogsResponse)) {
             throw new RuntimeException("Cant fetch worklogs for issue: " + issueKey + "!");
         }
@@ -76,14 +74,8 @@ public class JiraClientImpl implements JiraClient {
                 .toUri();
     }
 
-    private HttpEntity<String> getAuthHttpEntity() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", "Basic " + jiraProperties.getPassword());
-        return new HttpEntity<>(headers);
-    }
-
     private Optional<IssuesResponse> fetchIssuesResponse(Range<ChronoLocalDate> monthRange, String user, int startIndex, int maxResults) {
         URI uri = buildSearchIssuesUri(monthRange, user, startIndex, maxResults);
-        return Optional.ofNullable(restTemplate.exchange(uri, HttpMethod.GET, getAuthHttpEntity(), IssuesResponse.class).getBody());
+        return Optional.ofNullable(restTemplate.exchange(uri, HttpMethod.GET, null, IssuesResponse.class).getBody());
     }
 }
