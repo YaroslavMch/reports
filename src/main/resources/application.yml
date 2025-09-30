@@ -1,5 +1,5 @@
 jira:
-  domain: https://easypark.jira.com/rest/api/2/
+  domain: https://easypark.jira.com/rest/api/3/
   illnessKey: MAN-6987
   vacationKey: MAN-6986
   email: ${USER_EMAIL} # https://developer.atlassian.com/cloud/jira/platform/basic-auth-for-rest-apis

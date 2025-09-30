@@ -8,14 +8,14 @@ import java.util.List;
 
 @Value
 public class IssuesResponse {
-    int total;
+    boolean isLast;
     List<Issue> issues;
 
     public IssuesResponse(
-            @JsonProperty("total") int total,
+            @JsonProperty("isLast") boolean isLast,
             @JsonProperty("issues") List<Issue> issues
     ) {
-        this.total = total;
+        this.isLast = isLast;
         this.issues = issues;
     }
 }

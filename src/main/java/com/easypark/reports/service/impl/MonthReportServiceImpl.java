@@ -93,7 +93,7 @@ public class MonthReportServiceImpl implements MonthReportService {
                 issue.getKey(),
                 workLog.getStarted(),
                 workLog.getTimeSpentSeconds() / ONE_HOUR_IN_SECONDS,
-                isBlank(workLog.getComment()) ? issue.getSummary() : workLog.getComment(),
+                isBlank(workLog.getCommentText()) ? issue.getSummary() : workLog.getCommentText(),
                 issue.getSummary());
     }
 }

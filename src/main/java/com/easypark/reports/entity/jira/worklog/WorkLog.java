@@ -9,13 +9,13 @@ import java.time.LocalDate;
 @Value
 public class WorkLog {
     User author;
-    String comment;
+    AdfDocument comment;
     LocalDate started;
     double timeSpentSeconds;
 
     public WorkLog(
             @JsonProperty("author") User author,
-            @JsonProperty("comment") String comment,
+            @JsonProperty("comment") AdfDocument comment,
             @JsonProperty("started") String started,
             @JsonProperty("timeSpentSeconds") double timeSpentSeconds
     ) {
@@ -23,5 +23,9 @@ public class WorkLog {
         this.comment = comment;
         this.started = LocalDate.parse(started.split("T")[0]);
         this.timeSpentSeconds = timeSpentSeconds;
+    }
+
+    public String getCommentText() {
+        return comment != null ? comment.extractText() : "";
     }
 }

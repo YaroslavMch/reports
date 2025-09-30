@@ -45,10 +45,13 @@ public class JiraClientImpl implements JiraClient {
         final int maxResults = 100;
         List<Issue> issues = new ArrayList<>();
         int startAt = 0;
-        int total = fetchIssuesResponse(monthRange, user, startAt, maxResults).orElseThrow().getTotal();
+        boolean isLast = false;
         do {
-            fetchIssuesResponse(monthRange, user, startAt, maxResults).ifPresent(response -> issues.addAll(response.getIssues()));
-        } while (issues.size() < total);
+            IssuesResponse response = fetchIssuesResponse(monthRange, user, startAt, maxResults).orElseThrow();
+            issues.addAll(response.getIssues());
+            isLast = response.isLast();
+            startAt += maxResults;
+        } while (!isLast);
         return issues;
     }
 
@@ -64,7 +67,7 @@ public class JiraClientImpl implements JiraClient {
     private URI buildSearchIssuesUri(Range<ChronoLocalDate> monthRange, String user, int startAt, int maxResults) {
         return UriComponentsBuilder
                 .fromUriString(jiraProperties.getDomain())
-                .path("search")
+                .path("search/jql")
                 .queryParam("startAt", startAt)
                 .queryParam("maxResults", maxResults)
                 .queryParam("fields", "issueKey, summary")
